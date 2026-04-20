@@ -1,0 +1,4 @@
+/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/build/CMakeFiles/GLAD.dir
+/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/build/CMakeFiles/opengl_project.dir
+/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/build/CMakeFiles/edit_cache.dir
+/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/build/CMakeFiles/rebuild_cache.dir
