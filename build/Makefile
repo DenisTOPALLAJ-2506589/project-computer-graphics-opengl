@@ -214,6 +214,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/renderer/Shader.o: src/renderer/Shader.cpp.o
+.PHONY : src/renderer/Shader.o
+
+# target to build an object file
+src/renderer/Shader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Shader.cpp.o
+.PHONY : src/renderer/Shader.cpp.o
+
+src/renderer/Shader.i: src/renderer/Shader.cpp.i
+.PHONY : src/renderer/Shader.i
+
+# target to preprocess a source file
+src/renderer/Shader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Shader.cpp.i
+.PHONY : src/renderer/Shader.cpp.i
+
+src/renderer/Shader.s: src/renderer/Shader.cpp.s
+.PHONY : src/renderer/Shader.s
+
+# target to generate assembly for a file
+src/renderer/Shader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Shader.cpp.s
+.PHONY : src/renderer/Shader.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -233,6 +257,9 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/renderer/Shader.o"
+	@echo "... src/renderer/Shader.i"
+	@echo "... src/renderer/Shader.s"
 .PHONY : help
 
 

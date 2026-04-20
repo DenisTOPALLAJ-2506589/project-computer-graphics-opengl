@@ -1,7 +1,7 @@
-CMakeFiles/opengl_project.dir/src/main.cpp.o: \
- /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/main.cpp \
+CMakeFiles/opengl_project.dir/src/renderer/Shader.cpp.o: \
+ /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/renderer/Shader.cpp \
  /usr/include/stdc-predef.h \
- /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/core/Window.h \
+ /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/renderer/Shader.h \
  /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/includes/glad/glad.h \
  /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/includes/KHR/khrplatform.h \
  /usr/lib/gcc/x86_64-redhat-linux/15/include/stdint.h \
@@ -13,10 +13,8 @@ CMakeFiles/opengl_project.dir/src/main.cpp.o: \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/bits/time64.h /usr/include/bits/wchar.h \
  /usr/include/bits/stdint-intn.h /usr/include/bits/stdint-uintn.h \
- /usr/include/bits/stdint-least.h \
- /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/includes/GLFW/glfw3.h \
- /usr/lib/gcc/x86_64-redhat-linux/15/include/stddef.h \
- /usr/include/c++/15/string /usr/include/c++/15/bits/requires_hosted.h \
+ /usr/include/bits/stdint-least.h /usr/include/c++/15/string \
+ /usr/include/c++/15/bits/requires_hosted.h \
  /usr/include/c++/15/x86_64-redhat-linux/bits/c++config.h \
  /usr/include/c++/15/x86_64-redhat-linux/bits/os_defines.h \
  /usr/include/c++/15/x86_64-redhat-linux/bits/cpu_defines.h \
@@ -27,6 +25,7 @@ CMakeFiles/opengl_project.dir/src/main.cpp.o: \
  /usr/include/c++/15/bits/postypes.h /usr/include/c++/15/cwchar \
  /usr/include/wchar.h /usr/include/bits/floatn.h \
  /usr/include/bits/floatn-common.h \
+ /usr/lib/gcc/x86_64-redhat-linux/15/include/stddef.h \
  /usr/lib/gcc/x86_64-redhat-linux/15/include/stdarg.h \
  /usr/include/bits/types/wint_t.h /usr/include/bits/types/mbstate_t.h \
  /usr/include/bits/types/__mbstate_t.h /usr/include/bits/types/__FILE.h \
@@ -102,10 +101,9 @@ CMakeFiles/opengl_project.dir/src/main.cpp.o: \
  /usr/include/c++/15/bits/memory_resource.h /usr/include/c++/15/cstddef \
  /usr/include/c++/15/bits/uses_allocator.h \
  /usr/include/c++/15/bits/uses_allocator_args.h /usr/include/c++/15/tuple \
- /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/renderer/Shader.h \
- /usr/include/c++/15/iostream /usr/include/c++/15/ostream \
- /usr/include/c++/15/bits/ostream.h /usr/include/c++/15/ios \
- /usr/include/c++/15/exception /usr/include/c++/15/bits/exception_ptr.h \
+ /usr/include/c++/15/fstream /usr/include/c++/15/istream \
+ /usr/include/c++/15/ios /usr/include/c++/15/exception \
+ /usr/include/c++/15/bits/exception_ptr.h \
  /usr/include/c++/15/bits/cxxabi_init_exception.h \
  /usr/include/c++/15/typeinfo /usr/include/c++/15/bits/nested_exception.h \
  /usr/include/c++/15/bits/ios_base.h /usr/include/c++/15/ext/atomicity.h \
@@ -139,6 +137,10 @@ CMakeFiles/opengl_project.dir/src/main.cpp.o: \
  /usr/include/c++/15/bits/streambuf_iterator.h \
  /usr/include/c++/15/x86_64-redhat-linux/bits/ctype_inline.h \
  /usr/include/c++/15/bits/locale_facets.tcc \
- /usr/include/c++/15/bits/basic_ios.tcc \
- /usr/include/c++/15/bits/ostream.tcc /usr/include/c++/15/istream \
- /usr/include/c++/15/bits/istream.tcc
+ /usr/include/c++/15/bits/basic_ios.tcc /usr/include/c++/15/ostream \
+ /usr/include/c++/15/bits/ostream.h /usr/include/c++/15/bits/ostream.tcc \
+ /usr/include/c++/15/bits/istream.tcc /usr/include/c++/15/bits/codecvt.h \
+ /usr/include/c++/15/x86_64-redhat-linux/bits/basic_file.h \
+ /usr/include/c++/15/x86_64-redhat-linux/bits/c++io.h \
+ /usr/include/c++/15/bits/fstream.tcc /usr/include/c++/15/sstream \
+ /usr/include/c++/15/bits/sstream.tcc /usr/include/c++/15/iostream
