@@ -72,33 +72,51 @@ include CMakeFiles/opengl_project.dir/flags.make
 CMakeFiles/opengl_project.dir/codegen:
 .PHONY : CMakeFiles/opengl_project.dir/codegen
 
-CMakeFiles/opengl_project.dir/main.cpp.o: CMakeFiles/opengl_project.dir/flags.make
-CMakeFiles/opengl_project.dir/main.cpp.o: /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/main.cpp
-CMakeFiles/opengl_project.dir/main.cpp.o: CMakeFiles/opengl_project.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/opengl_project.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/opengl_project.dir/main.cpp.o -MF CMakeFiles/opengl_project.dir/main.cpp.o.d -o CMakeFiles/opengl_project.dir/main.cpp.o -c /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/main.cpp
+CMakeFiles/opengl_project.dir/src/core/Window.cpp.o: CMakeFiles/opengl_project.dir/flags.make
+CMakeFiles/opengl_project.dir/src/core/Window.cpp.o: /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/core/Window.cpp
+CMakeFiles/opengl_project.dir/src/core/Window.cpp.o: CMakeFiles/opengl_project.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/opengl_project.dir/src/core/Window.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/opengl_project.dir/src/core/Window.cpp.o -MF CMakeFiles/opengl_project.dir/src/core/Window.cpp.o.d -o CMakeFiles/opengl_project.dir/src/core/Window.cpp.o -c /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/core/Window.cpp
 
-CMakeFiles/opengl_project.dir/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/opengl_project.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/main.cpp > CMakeFiles/opengl_project.dir/main.cpp.i
+CMakeFiles/opengl_project.dir/src/core/Window.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/opengl_project.dir/src/core/Window.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/core/Window.cpp > CMakeFiles/opengl_project.dir/src/core/Window.cpp.i
 
-CMakeFiles/opengl_project.dir/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/opengl_project.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/main.cpp -o CMakeFiles/opengl_project.dir/main.cpp.s
+CMakeFiles/opengl_project.dir/src/core/Window.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/opengl_project.dir/src/core/Window.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/core/Window.cpp -o CMakeFiles/opengl_project.dir/src/core/Window.cpp.s
+
+CMakeFiles/opengl_project.dir/src/main.cpp.o: CMakeFiles/opengl_project.dir/flags.make
+CMakeFiles/opengl_project.dir/src/main.cpp.o: /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/main.cpp
+CMakeFiles/opengl_project.dir/src/main.cpp.o: CMakeFiles/opengl_project.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/opengl_project.dir/src/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/opengl_project.dir/src/main.cpp.o -MF CMakeFiles/opengl_project.dir/src/main.cpp.o.d -o CMakeFiles/opengl_project.dir/src/main.cpp.o -c /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/main.cpp
+
+CMakeFiles/opengl_project.dir/src/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/opengl_project.dir/src/main.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/main.cpp > CMakeFiles/opengl_project.dir/src/main.cpp.i
+
+CMakeFiles/opengl_project.dir/src/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/opengl_project.dir/src/main.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/main.cpp -o CMakeFiles/opengl_project.dir/src/main.cpp.s
 
 # Object files for target opengl_project
 opengl_project_OBJECTS = \
-"CMakeFiles/opengl_project.dir/main.cpp.o"
+"CMakeFiles/opengl_project.dir/src/core/Window.cpp.o" \
+"CMakeFiles/opengl_project.dir/src/main.cpp.o"
 
 # External object files for target opengl_project
 opengl_project_EXTERNAL_OBJECTS =
 
-opengl_project: CMakeFiles/opengl_project.dir/main.cpp.o
+opengl_project: CMakeFiles/opengl_project.dir/src/core/Window.cpp.o
+opengl_project: CMakeFiles/opengl_project.dir/src/main.cpp.o
 opengl_project: CMakeFiles/opengl_project.dir/build.make
 opengl_project: CMakeFiles/opengl_project.dir/compiler_depend.ts
 opengl_project: libGLAD.a
+opengl_project: /usr/lib64/libGLX.so
+opengl_project: /usr/lib64/libOpenGL.so
 opengl_project: CMakeFiles/opengl_project.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable opengl_project"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable opengl_project"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/opengl_project.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

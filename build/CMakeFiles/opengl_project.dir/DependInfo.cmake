@@ -8,7 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/main.cpp" "CMakeFiles/opengl_project.dir/main.cpp.o" "gcc" "CMakeFiles/opengl_project.dir/main.cpp.o.d"
+  "/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/core/Window.cpp" "CMakeFiles/opengl_project.dir/src/core/Window.cpp.o" "gcc" "CMakeFiles/opengl_project.dir/src/core/Window.cpp.o.d"
+  "/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/main.cpp" "CMakeFiles/opengl_project.dir/src/main.cpp.o" "gcc" "CMakeFiles/opengl_project.dir/src/main.cpp.o.d"
   "" "opengl_project" "gcc" "CMakeFiles/opengl_project.dir/link.d"
   )
 

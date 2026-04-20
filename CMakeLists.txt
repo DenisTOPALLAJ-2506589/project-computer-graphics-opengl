@@ -17,9 +17,22 @@ message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 
 set(LIBS glfw3 opengl32)
 
-add_library(GLAD "glad.c")
 set(LIBS ${LIBS} GLAD)
 
 include_directories(${CMAKE_SOURCE_DIR}/includes)
-add_executable(opengl_project main.cpp stb_image.h main.cpp)
-target_link_libraries(opengl_project ${LIBS})
+
+add_library(GLAD STATIC glad.c)
+target_include_directories(GLAD PUBLIC includes/)
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+add_executable(opengl_project ${SOURCES})
+
+target_include_directories(opengl_project PRIVATE
+    src/
+    includes/
+)
+target_link_libraries(opengl_project
+    OpenGL::GL
+    glfw
+    GLAD
+    dl
+)

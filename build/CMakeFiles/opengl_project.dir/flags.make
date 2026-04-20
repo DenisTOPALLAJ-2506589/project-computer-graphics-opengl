@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/includes
+CXX_INCLUDES = -I/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/includes -I/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src
 
 CXX_FLAGS = 
 
