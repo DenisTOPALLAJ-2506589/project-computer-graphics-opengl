@@ -214,6 +214,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/renderer/Mesh.o: src/renderer/Mesh.cpp.o
+.PHONY : src/renderer/Mesh.o
+
+# target to build an object file
+src/renderer/Mesh.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Mesh.cpp.o
+.PHONY : src/renderer/Mesh.cpp.o
+
+src/renderer/Mesh.i: src/renderer/Mesh.cpp.i
+.PHONY : src/renderer/Mesh.i
+
+# target to preprocess a source file
+src/renderer/Mesh.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Mesh.cpp.i
+.PHONY : src/renderer/Mesh.cpp.i
+
+src/renderer/Mesh.s: src/renderer/Mesh.cpp.s
+.PHONY : src/renderer/Mesh.s
+
+# target to generate assembly for a file
+src/renderer/Mesh.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Mesh.cpp.s
+.PHONY : src/renderer/Mesh.cpp.s
+
 src/renderer/Shader.o: src/renderer/Shader.cpp.o
 .PHONY : src/renderer/Shader.o
 
@@ -238,6 +262,54 @@ src/renderer/Shader.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Shader.cpp.s
 .PHONY : src/renderer/Shader.cpp.s
 
+src/renderer/Texture.o: src/renderer/Texture.cpp.o
+.PHONY : src/renderer/Texture.o
+
+# target to build an object file
+src/renderer/Texture.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Texture.cpp.o
+.PHONY : src/renderer/Texture.cpp.o
+
+src/renderer/Texture.i: src/renderer/Texture.cpp.i
+.PHONY : src/renderer/Texture.i
+
+# target to preprocess a source file
+src/renderer/Texture.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Texture.cpp.i
+.PHONY : src/renderer/Texture.cpp.i
+
+src/renderer/Texture.s: src/renderer/Texture.cpp.s
+.PHONY : src/renderer/Texture.s
+
+# target to generate assembly for a file
+src/renderer/Texture.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/renderer/Texture.cpp.s
+.PHONY : src/renderer/Texture.cpp.s
+
+src/scene/Camera.o: src/scene/Camera.cpp.o
+.PHONY : src/scene/Camera.o
+
+# target to build an object file
+src/scene/Camera.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/scene/Camera.cpp.o
+.PHONY : src/scene/Camera.cpp.o
+
+src/scene/Camera.i: src/scene/Camera.cpp.i
+.PHONY : src/scene/Camera.i
+
+# target to preprocess a source file
+src/scene/Camera.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/scene/Camera.cpp.i
+.PHONY : src/scene/Camera.cpp.i
+
+src/scene/Camera.s: src/scene/Camera.cpp.s
+.PHONY : src/scene/Camera.s
+
+# target to generate assembly for a file
+src/scene/Camera.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/opengl_project.dir/build.make CMakeFiles/opengl_project.dir/src/scene/Camera.cpp.s
+.PHONY : src/scene/Camera.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -257,9 +329,18 @@ help:
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/renderer/Mesh.o"
+	@echo "... src/renderer/Mesh.i"
+	@echo "... src/renderer/Mesh.s"
 	@echo "... src/renderer/Shader.o"
 	@echo "... src/renderer/Shader.i"
 	@echo "... src/renderer/Shader.s"
+	@echo "... src/renderer/Texture.o"
+	@echo "... src/renderer/Texture.i"
+	@echo "... src/renderer/Texture.s"
+	@echo "... src/scene/Camera.o"
+	@echo "... src/scene/Camera.i"
+	@echo "... src/scene/Camera.s"
 .PHONY : help
 
 

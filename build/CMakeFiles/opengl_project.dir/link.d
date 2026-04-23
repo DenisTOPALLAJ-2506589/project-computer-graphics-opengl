@@ -4,7 +4,10 @@ opengl_project: \
   /usr/lib/gcc/x86_64-redhat-linux/15/crtbegin.o \
   CMakeFiles/opengl_project.dir/src/core/Window.cpp.o \
   CMakeFiles/opengl_project.dir/src/main.cpp.o \
+  CMakeFiles/opengl_project.dir/src/renderer/Mesh.cpp.o \
   CMakeFiles/opengl_project.dir/src/renderer/Shader.cpp.o \
+  CMakeFiles/opengl_project.dir/src/renderer/Texture.cpp.o \
+  CMakeFiles/opengl_project.dir/src/scene/Camera.cpp.o \
   /usr/lib/gcc/x86_64-redhat-linux/15/../../../../lib64/libglfw.so \
   libGLAD.a \
   /usr/lib/gcc/x86_64-redhat-linux/15/../../../../lib64/libdl.a \
@@ -53,7 +56,13 @@ CMakeFiles/opengl_project.dir/src/core/Window.cpp.o:
 
 CMakeFiles/opengl_project.dir/src/main.cpp.o:
 
+CMakeFiles/opengl_project.dir/src/renderer/Mesh.cpp.o:
+
 CMakeFiles/opengl_project.dir/src/renderer/Shader.cpp.o:
+
+CMakeFiles/opengl_project.dir/src/renderer/Texture.cpp.o:
+
+CMakeFiles/opengl_project.dir/src/scene/Camera.cpp.o:
 
 /usr/lib/gcc/x86_64-redhat-linux/15/../../../../lib64/libglfw.so:
 

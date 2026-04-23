@@ -10,7 +10,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/core/Window.cpp" "CMakeFiles/opengl_project.dir/src/core/Window.cpp.o" "gcc" "CMakeFiles/opengl_project.dir/src/core/Window.cpp.o.d"
   "/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/main.cpp" "CMakeFiles/opengl_project.dir/src/main.cpp.o" "gcc" "CMakeFiles/opengl_project.dir/src/main.cpp.o.d"
+  "/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/renderer/Mesh.cpp" "CMakeFiles/opengl_project.dir/src/renderer/Mesh.cpp.o" "gcc" "CMakeFiles/opengl_project.dir/src/renderer/Mesh.cpp.o.d"
   "/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/renderer/Shader.cpp" "CMakeFiles/opengl_project.dir/src/renderer/Shader.cpp.o" "gcc" "CMakeFiles/opengl_project.dir/src/renderer/Shader.cpp.o.d"
+  "/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/renderer/Texture.cpp" "CMakeFiles/opengl_project.dir/src/renderer/Texture.cpp.o" "gcc" "CMakeFiles/opengl_project.dir/src/renderer/Texture.cpp.o.d"
+  "/home/denis/Desktop/UHasselt/S2/computer-graphics-and-visual-computing/project-opengl/src/scene/Camera.cpp" "CMakeFiles/opengl_project.dir/src/scene/Camera.cpp.o" "gcc" "CMakeFiles/opengl_project.dir/src/scene/Camera.cpp.o.d"
   "" "opengl_project" "gcc" "CMakeFiles/opengl_project.dir/link.d"
   )
 
