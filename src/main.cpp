@@ -2,6 +2,7 @@
 #include "renderer/Mesh.h"
 #include "renderer/Shader.h"
 #include "renderer/Texture.h"
+#include "scene/BezierCurve.h"
 #include "scene/Camera.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -10,10 +11,27 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 14.0f));
 float lastX = 400.0f, lastY = 300.0f;
 bool firstMouse = true;
 float deltaTime = 0.0f, lastFrame = 0.0f;
+float bezierT = 0.0f;
+bool usingSecondCurve = false;
+bool cKeyWasPressed = false;
+const int numCarriages = 6;
+const float carriageSpacing = 0.15f;
+
+BezierCurve createFirstCurve() {
+    // flat curve
+    return BezierCurve(glm::vec3(-6.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 1.0f, 0.0f), glm::vec3(2.0f, -1.0f, 0.0f),
+                       glm::vec3(6.0f, 0.0f, 0.0f));
+}
+
+BezierCurve createSecondCurve() {
+    // curve with height
+    return BezierCurve(glm::vec3(-6.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 0.0f, 10.0f), glm::vec3(2.0f, 0.0f, -10.0f),
+                       glm::vec3(6.0f, 0.0f, 0.0f));
+}
 
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
@@ -45,6 +63,41 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        camera.ProcessKeyboard(UP, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        camera.ProcessKeyboard(DOWN, deltaTime);
+
+    // Toggle curve on C press (not hold) using edge detection
+    bool cKeyIsPressed = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
+    if (cKeyIsPressed && !cKeyWasPressed) {
+        usingSecondCurve = !usingSecondCurve;
+        bezierT = 0.0f; // reset position on curve switch
+    }
+    cKeyWasPressed = cKeyIsPressed;
+}
+
+void drawCarriages(Shader &shader, Mesh &mesh, BezierCurve &curve, int numCarriages, float spacing, bool flatCurve) {
+    for (int i = 0; i < numCarriages; i++) {
+        float t = fmod(bezierT + i * spacing, 1.0f);
+        glm::vec3 pos = curve.evaluate(t);
+        glm::vec3 tangent = glm::normalize(curve.evaluateTangent(t));
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, pos);
+
+        if (flatCurve) {
+            float angle = atan2(tangent.z, tangent.x);
+            model = glm::rotate(model, angle, glm::vec3(0.0f, -1.0f, 0.0f));
+        } else {
+            float angle = atan2(tangent.y, tangent.x);
+            model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+        }
+
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        shader.setMat4("model", model);
+        mesh.draw();
+    }
 }
 
 int main() {
@@ -59,31 +112,27 @@ int main() {
     Texture texture("src/resources/train-carriage.png");
 
     std::vector<float> vertices = {
-        // positions          // texture coords
         -1.0f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,  -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f,
         1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f, -1.0f, -0.5f, -0.5f, 0.0f, 0.0f,
-
         -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  -0.5f, 0.5f,  1.0f, 0.0f, 1.0f,  0.5f,  0.5f,  1.0f, 1.0f,
         1.0f,  0.5f,  0.5f,  1.0f, 1.0f, -1.0f, 0.5f,  0.5f,  0.0f, 1.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f,
-
         -1.0f, 0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.5f,  -0.5f, 1.0f, 1.0f, -1.0f, -0.5f, -0.5f, 0.0f, 1.0f,
         -1.0f, -0.5f, -0.5f, 0.0f, 1.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, -1.0f, 0.5f,  0.5f,  1.0f, 0.0f,
-
         1.0f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 0.0f, 1.0f,
         1.0f,  -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  0.5f,  0.5f,  1.0f, 0.0f,
-
         -1.0f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,  -0.5f, 0.5f,  1.0f, 0.0f,
         1.0f,  -0.5f, 0.5f,  1.0f, 0.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, -1.0f, -0.5f, -0.5f, 0.0f, 1.0f,
-
         -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, 1.0f,  0.5f,  0.5f,  1.0f, 0.0f,
         1.0f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.5f,  0.5f,  0.0f, 0.0f, -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f};
 
     std::vector<unsigned int> indices;
-    for (int i = 0; i < vertices.size() / 5; i++) {
+    for (int i = 0; i < vertices.size() / 5; i++)
         indices.push_back(i);
-    }
 
     Mesh mesh(vertices, indices);
+
+    BezierCurve firstCurve = createFirstCurve();
+    BezierCurve secondCurve = createSecondCurve();
 
     while (!window.shouldClose()) {
         float currentFrame = static_cast<float>(glfwGetTime());
@@ -96,18 +145,15 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader.use();
-
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),
-                                                (float)window.getWidth() / (float)window.getHeight(), 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
-
-        shader.setMat4("projection", projection);
-        shader.setMat4("view", view);
-        shader.setMat4("model", model);
-
+        shader.setMat4("projection",
+                       glm::perspective(glm::radians(camera.Zoom), (float)window.getWidth() / (float)window.getHeight(),
+                                        0.1f, 100.0f));
+        shader.setMat4("view", camera.GetViewMatrix());
         texture.bind();
-        mesh.draw();
+
+        BezierCurve &activeCurve = usingSecondCurve ? secondCurve : firstCurve;
+        bezierT = activeCurve.advanceT(bezierT, deltaTime, 0.2f);
+        drawCarriages(shader, mesh, activeCurve, numCarriages, carriageSpacing, usingSecondCurve);
 
         window.swapBuffers();
         window.pollEvents();
