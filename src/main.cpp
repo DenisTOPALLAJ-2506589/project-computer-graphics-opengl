@@ -2,6 +2,8 @@
 #include "renderer/Mesh.h"
 #include "renderer/Shader.h"
 #include "renderer/Texture.h"
+#include "scene/BezierCurve.h"
+#include "scene/BezierCurveRenderer.h"
 #include "scene/Camera.h"
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -10,10 +12,31 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>
 
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(0.0f, 0.0f, 14.0f));
 float lastX = 400.0f, lastY = 300.0f;
 bool firstMouse = true;
 float deltaTime = 0.0f, lastFrame = 0.0f;
+float bezierDistance = 0.0f;
+bool usingSecondCurve = false;
+bool cKeyWasPressed = false;
+const int numCarriages = 6;
+const float carriageSpacing = 1.2f;
+
+BezierCurve createFirstCurve() {
+    // flat curve
+    BezierCurve curve(glm::vec3(-6.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 1.0f, 0.0f), glm::vec3(2.0f, -1.0f, 0.0f),
+                      glm::vec3(6.0f, 0.0f, 0.0f));
+    curve.buildLUT();
+    return curve;
+}
+
+BezierCurve createSecondCurve() {
+    // curve with height
+    BezierCurve curve(glm::vec3(-6.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 0.0f, 10.0f), glm::vec3(2.0f, 0.0f, -10.0f),
+                      glm::vec3(6.0f, 0.0f, 0.0f));
+    curve.buildLUT();
+    return curve;
+}
 
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
@@ -45,6 +68,67 @@ void processInput(GLFWwindow *window) {
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        camera.ProcessKeyboard(UP, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        camera.ProcessKeyboard(DOWN, deltaTime);
+
+    bool cKeyIsPressed = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
+    if (cKeyIsPressed && !cKeyWasPressed) {
+        usingSecondCurve = !usingSecondCurve;
+        bezierDistance = 0.0f; // reset position on curve switch
+    }
+    cKeyWasPressed = cKeyIsPressed;
+}
+
+void drawCarriages(Shader &shader, Mesh &mesh, BezierCurve &curve, int numCarriages, float spacing, bool flatCurve) {
+    for (int i = 0; i < numCarriages; i++) {
+        float d = fmod(bezierDistance + i * spacing, curve.getTotalLength());
+        float t = curve.getTFromDistance(d);
+        glm::vec3 pos = curve.evaluate(t);
+        glm::vec3 tangent = glm::normalize(curve.evaluateTangent(t));
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, pos);
+
+        if (flatCurve) {
+            float angle = atan2(tangent.z, tangent.x);
+            model = glm::rotate(model, angle, glm::vec3(0.0f, -1.0f, 0.0f));
+        } else {
+            float angle = atan2(tangent.y, tangent.x);
+            model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
+        }
+
+        model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
+        shader.setMat4("model", model);
+        mesh.draw();
+    }
+}
+
+void handleSceneUpdate(Window &window, BezierCurve &firstCurve, BezierCurve &secondCurve,
+                       BezierCurveRenderer &firstRenderer, BezierCurveRenderer &secondRenderer,
+                       BezierCurve *&activeCurve, BezierCurveRenderer *&activeRenderer) {
+    processInput(window.getHandle());
+
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    activeCurve = usingSecondCurve ? &secondCurve : &firstCurve;
+    activeRenderer = usingSecondCurve ? &secondRenderer : &firstRenderer;
+
+    bezierDistance += deltaTime * 5.0f; // 5.0 units per second
+    bezierDistance = fmod(bezierDistance, activeCurve->getTotalLength());
+}
+
+void renderBezierPath(Shader &lineShader, BezierCurveRenderer &activeRenderer, Window &window) {
+    lineShader.use();
+    lineShader.setMat4("projection",
+                       glm::perspective(glm::radians(camera.Zoom), (float)window.getWidth() / (float)window.getHeight(),
+                                        0.1f, 100.0f));
+    lineShader.setMat4("view", camera.GetViewMatrix());
+    lineShader.setMat4("model", glm::mat4(1.0f));
+    lineShader.setVec3("color", glm::vec3(1.0f, 1.0f, 1.0f)); // White path
+    activeRenderer.draw(lineShader);
 }
 
 int main() {
@@ -56,58 +140,55 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     Shader shader("src/shaders/basic.vert", "src/shaders/basic.frag");
+    Shader lineShader("src/shaders/color.vert", "src/shaders/color.frag");
     Texture texture("src/resources/train-carriage.png");
 
     std::vector<float> vertices = {
-        // positions          // texture coords
         -1.0f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,  -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f,
         1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f, -1.0f, -0.5f, -0.5f, 0.0f, 0.0f,
-
         -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  -0.5f, 0.5f,  1.0f, 0.0f, 1.0f,  0.5f,  0.5f,  1.0f, 1.0f,
         1.0f,  0.5f,  0.5f,  1.0f, 1.0f, -1.0f, 0.5f,  0.5f,  0.0f, 1.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f,
-
         -1.0f, 0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.5f,  -0.5f, 1.0f, 1.0f, -1.0f, -0.5f, -0.5f, 0.0f, 1.0f,
         -1.0f, -0.5f, -0.5f, 0.0f, 1.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, -1.0f, 0.5f,  0.5f,  1.0f, 0.0f,
-
         1.0f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 0.0f, 1.0f,
         1.0f,  -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  0.5f,  0.5f,  1.0f, 0.0f,
-
         -1.0f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,  -0.5f, 0.5f,  1.0f, 0.0f,
         1.0f,  -0.5f, 0.5f,  1.0f, 0.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, -1.0f, -0.5f, -0.5f, 0.0f, 1.0f,
-
         -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, 1.0f,  0.5f,  0.5f,  1.0f, 0.0f,
         1.0f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.5f,  0.5f,  0.0f, 0.0f, -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f};
 
     std::vector<unsigned int> indices;
-    for (int i = 0; i < vertices.size() / 5; i++) {
+    for (int i = 0; i < vertices.size() / 5; i++)
         indices.push_back(i);
-    }
 
     Mesh mesh(vertices, indices);
+
+    BezierCurve firstCurve = createFirstCurve();
+    BezierCurve secondCurve = createSecondCurve();
+
+    BezierCurveRenderer firstRenderer(firstCurve);
+    BezierCurveRenderer secondRenderer(secondCurve);
+
+    BezierCurve *activeCurve = nullptr;
+    BezierCurveRenderer *activeRenderer = nullptr;
 
     while (!window.shouldClose()) {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        processInput(window.getHandle());
+        handleSceneUpdate(window, firstCurve, secondCurve, firstRenderer, secondRenderer, activeCurve, activeRenderer);
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        renderBezierPath(lineShader, *activeRenderer, window);
 
         shader.use();
-
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),
-                                                (float)window.getWidth() / (float)window.getHeight(), 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
-
-        shader.setMat4("projection", projection);
-        shader.setMat4("view", view);
-        shader.setMat4("model", model);
-
+        shader.setMat4("projection",
+                       glm::perspective(glm::radians(camera.Zoom), (float)window.getWidth() / (float)window.getHeight(),
+                                        0.1f, 100.0f));
+        shader.setMat4("view", camera.GetViewMatrix());
         texture.bind();
-        mesh.draw();
+
+        drawCarriages(shader, mesh, *activeCurve, numCarriages, carriageSpacing, usingSecondCurve);
 
         window.swapBuffers();
         window.pollEvents();
