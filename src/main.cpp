@@ -22,6 +22,13 @@ bool cKeyWasPressed = false;
 const int numCarriages = 6;
 const float carriageSpacing = 1.2f;
 
+bool cameraMode = false;
+bool bKeyWasPressed = false;
+
+glm::vec3 buttonWorldPos = glm::vec3(0.0f, 3.0f, 0.0f);
+float buttonClickRadius = 25.0f;
+bool buttonWasPressed = false;
+
 BezierCurve createFirstCurve() {
     // flat curve
     BezierCurve curve(glm::vec3(-6.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 1.0f, 0.0f), glm::vec3(2.0f, -1.0f, 0.0f),
@@ -50,11 +57,34 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
     float yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
-    camera.ProcessMouseMovement(xoffset, yoffset);
+
+    if (cameraMode || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS) {
+        camera.ProcessMouseMovement(xoffset, yoffset);
+    }
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+void checkButtonInteraction(GLFWwindow *window, Window &win) {
+    bool leftMousePressed = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
+    if (leftMousePressed && !buttonWasPressed) {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        glm::mat4 projection =
+            glm::perspective(glm::radians(camera.Zoom), (float)win.getWidth() / (float)win.getHeight(), 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        glm::vec4 viewport(0, 0, win.getWidth(), win.getHeight());
+        glm::vec3 screenPos = glm::project(buttonWorldPos, view, projection, viewport);
+        float screenY = win.getHeight() - screenPos.y;
+        float dist = glm::distance(glm::vec2(xpos, ypos), glm::vec2(screenPos.x, screenY));
+        if (dist < buttonClickRadius) {
+            usingSecondCurve = !usingSecondCurve;
+            bezierDistance = 0.0f;
+        }
+    }
+    buttonWasPressed = leftMousePressed;
 }
 
 void processInput(GLFWwindow *window) {
@@ -79,9 +109,20 @@ void processInput(GLFWwindow *window) {
         bezierDistance = 0.0f; // reset position on curve switch
     }
     cKeyWasPressed = cKeyIsPressed;
+
+    bool bKeyIsPressed = glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS;
+    if (bKeyIsPressed && !bKeyWasPressed) {
+        cameraMode = !cameraMode;
+        if (cameraMode)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    bKeyWasPressed = bKeyIsPressed;
 }
 
 void drawCarriages(Shader &shader, Mesh &mesh, BezierCurve &curve, int numCarriages, float spacing, bool flatCurve) {
+    shader.use();
     for (int i = 0; i < numCarriages; i++) {
         float d = fmod(bezierDistance + i * spacing, curve.getTotalLength());
         float t = curve.getTFromDistance(d);
@@ -109,6 +150,7 @@ void handleSceneUpdate(Window &window, BezierCurve &firstCurve, BezierCurve &sec
                        BezierCurveRenderer &firstRenderer, BezierCurveRenderer &secondRenderer,
                        BezierCurve *&activeCurve, BezierCurveRenderer *&activeRenderer) {
     processInput(window.getHandle());
+    checkButtonInteraction(window.getHandle(), window);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -131,11 +173,27 @@ void renderBezierPath(Shader &lineShader, BezierCurveRenderer &activeRenderer, W
     activeRenderer.draw(lineShader);
 }
 
+void drawButton(Shader &lineShader, Mesh &mesh, Window &window) {
+    lineShader.use();
+    lineShader.setMat4("projection",
+                       glm::perspective(glm::radians(camera.Zoom), (float)window.getWidth() / (float)window.getHeight(),
+                                        0.1f, 100.0f));
+    lineShader.setMat4("view", camera.GetViewMatrix());
+
+    glm::mat4 buttonModel = glm::mat4(1.0f);
+    buttonModel = glm::translate(buttonModel, buttonWorldPos);
+    buttonModel = glm::scale(buttonModel, glm::vec3(0.4f, 0.4f, 0.4f));
+    lineShader.setMat4("model", buttonModel);
+    lineShader.setVec3("color", glm::vec3(1.0f, 0.5f, 0.0f)); // Orange
+
+    mesh.draw();
+}
+
 int main() {
     Window window(800, 600, "OpenGL Project");
     glfwSetCursorPosCallback(window.getHandle(), mouse_callback);
     glfwSetScrollCallback(window.getHandle(), scroll_callback);
-    glfwSetInputMode(window.getHandle(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window.getHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -187,6 +245,8 @@ int main() {
                                         0.1f, 100.0f));
         shader.setMat4("view", camera.GetViewMatrix());
         texture.bind();
+
+        drawButton(lineShader, mesh, window);
 
         drawCarriages(shader, mesh, *activeCurve, numCarriages, carriageSpacing, usingSecondCurve);
 
