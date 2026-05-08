@@ -1,3 +1,11 @@
+#include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <vector>
+
 #include "core/Window.h"
 #include "renderer/Mesh.h"
 #include "renderer/Shader.h"
@@ -5,12 +13,6 @@
 #include "scene/BezierCurve.h"
 #include "scene/BezierCurveRenderer.h"
 #include "scene/Camera.h"
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <vector>
 
 Camera camera(glm::vec3(0.0f, 0.0f, 14.0f));
 float lastX = 400.0f, lastY = 300.0f;
@@ -31,50 +33,28 @@ glm::vec3 buttonWorldPos = glm::vec3(0.0f, 3.0f, 0.0f);
 float buttonClickRadius = 25.0f;
 bool buttonWasPressed = false;
 
+std::vector<glm::vec3> generateCircularLoopPoints(float r, float h) {
+    /* SOURCES
+     * https://www.geeksforgeeks.org/cpp/bezier-curves-in-opengl/
+     * https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%C3%A9zier-curves (magic number)
+     */
+    float k = 0.552284749831f * r; // magic number for circular bezier curves => 4*(sqrt(2)-1)/3
+    return {
+        {r, 0.0f, 0.0f}, {r, h, k},    {k, -h, r},       {0.0f, 0.0f, r}, // Segment 1
+        {-k, h, r},      {-r, -h, k},  {-r, 0.0f, 0.0f},                  // Segment 2
+        {-r, h, -k},     {-k, -h, -r}, {0.0f, 0.0f, -r},                  // Segment 3
+        {k, h, -r},      {r, -h, -k},  {r, 0.0f, 0.0f}                    // Segment 4
+    };
+}
+
 BezierCurve createFirstLoopCurve() {
-    // A circular loop in XZ plane with height variation in Y
-    float R = 10.0f;
-    float K = 0.55228f * R;
-    float H = 2.0f; // height amplitude
-
-    std::vector<glm::vec3> points = {// Segment 1 (0 to 90 deg)
-                                     {R, 0.0f, 0.0f},
-                                     {R, H, K},
-                                     {K, -H, R},
-                                     {0.0f, 0.0f, R},
-                                     // Segment 2 (90 to 180 deg)
-                                     {0.0f, 0.0f, R},
-                                     {-K, H, R},
-                                     {-R, -H, K},
-                                     {-R, 0.0f, 0.0f},
-                                     // Segment 3 (180 to 270 deg)
-                                     {-R, 0.0f, 0.0f},
-                                     {-R, H, -K},
-                                     {-K, -H, -R},
-                                     {0.0f, 0.0f, -R},
-                                     // Segment 4 (270 to 360 deg)
-                                     {0.0f, 0.0f, -R},
-                                     {K, H, -R},
-                                     {R, -H, -K},
-                                     {R, 0.0f, 0.0f}};
-
-    BezierCurve curve(points);
+    BezierCurve curve(generateCircularLoopPoints(10.0f, 2.0f));
     curve.buildLUT(400);
     return curve;
 }
 
 BezierCurve createSecondLoopCurve() {
-    // A different loop, maybe smaller and more "ups and downs"
-    float R = 7.0f;
-    float K = 0.55228f * R;
-    float H = 5.0f;
-
-    std::vector<glm::vec3> points = {{R, 0.0f, 0.0f},  {R, H, K},   {K, -H, R},   {0.0f, 0.0f, R},
-                                     {0.0f, 0.0f, R},  {-K, H, R},  {-R, -H, K},  {-R, 0.0f, 0.0f},
-                                     {-R, 0.0f, 0.0f}, {-R, H, -K}, {-K, -H, -R}, {0.0f, 0.0f, -R},
-                                     {0.0f, 0.0f, -R}, {K, H, -R},  {R, -H, -K},  {R, 0.0f, 0.0f}};
-
-    BezierCurve curve(points);
+    BezierCurve curve(generateCircularLoopPoints(7.0f, 5.0f));
     curve.buildLUT(400);
     return curve;
 }
