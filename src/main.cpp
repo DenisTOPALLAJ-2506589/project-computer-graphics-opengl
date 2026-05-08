@@ -1,3 +1,11 @@
+#include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <vector>
+
 #include "core/Window.h"
 #include "renderer/Mesh.h"
 #include "renderer/Shader.h"
@@ -5,12 +13,6 @@
 #include "scene/BezierCurve.h"
 #include "scene/BezierCurveRenderer.h"
 #include "scene/Camera.h"
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <vector>
 
 Camera camera(glm::vec3(0.0f, 0.0f, 14.0f));
 float lastX = 400.0f, lastY = 300.0f;
@@ -24,24 +26,36 @@ const float carriageSpacing = 1.2f;
 
 bool cameraMode = false;
 bool bKeyWasPressed = false;
+bool fpvActive = false;
+bool fKeyWasPressed = false;
 
 glm::vec3 buttonWorldPos = glm::vec3(0.0f, 3.0f, 0.0f);
 float buttonClickRadius = 25.0f;
 bool buttonWasPressed = false;
 
-BezierCurve createFirstCurve() {
-    // flat curve
-    BezierCurve curve(glm::vec3(-6.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 1.0f, 0.0f), glm::vec3(2.0f, -1.0f, 0.0f),
-                      glm::vec3(6.0f, 0.0f, 0.0f));
-    curve.buildLUT();
+std::vector<glm::vec3> generateCircularLoopPoints(float r, float h) {
+    /* SOURCES
+     * https://www.geeksforgeeks.org/cpp/bezier-curves-in-opengl/
+     * https://stackoverflow.com/questions/1734745/how-to-create-circle-with-b%C3%A9zier-curves (magic number)
+     */
+    float k = 0.552284749831f * r; // magic number for circular bezier curves => 4*(sqrt(2)-1)/3
+    return {
+        {r, 0.0f, 0.0f}, {r, h, k},    {k, -h, r},       {0.0f, 0.0f, r}, // Segment 1
+        {-k, h, r},      {-r, -h, k},  {-r, 0.0f, 0.0f},                  // Segment 2
+        {-r, h, -k},     {-k, -h, -r}, {0.0f, 0.0f, -r},                  // Segment 3
+        {k, h, -r},      {r, -h, -k},  {r, 0.0f, 0.0f}                    // Segment 4
+    };
+}
+
+BezierCurve createFirstLoopCurve() {
+    BezierCurve curve(generateCircularLoopPoints(10.0f, 2.0f));
+    curve.buildLUT(400);
     return curve;
 }
 
-BezierCurve createSecondCurve() {
-    // curve with height
-    BezierCurve curve(glm::vec3(-6.0f, 0.0f, 0.0f), glm::vec3(-2.0f, 0.0f, 10.0f), glm::vec3(2.0f, 0.0f, -10.0f),
-                      glm::vec3(6.0f, 0.0f, 0.0f));
-    curve.buildLUT();
+BezierCurve createSecondLoopCurve() {
+    BezierCurve curve(generateCircularLoopPoints(7.0f, 5.0f));
+    curve.buildLUT(400);
     return curve;
 }
 
@@ -90,18 +104,21 @@ void checkButtonInteraction(GLFWwindow *window, Window &win) {
 void processInput(GLFWwindow *window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        camera.ProcessKeyboard(UP, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS && !fpvActive)
         camera.ProcessKeyboard(DOWN, deltaTime);
+
+    if (!fpvActive) {
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+            camera.ProcessKeyboard(FORWARD, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            camera.ProcessKeyboard(BACKWARD, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+            camera.ProcessKeyboard(LEFT, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            camera.ProcessKeyboard(RIGHT, deltaTime);
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            camera.ProcessKeyboard(UP, deltaTime);
+    }
 
     bool cKeyIsPressed = glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS;
     if (cKeyIsPressed && !cKeyWasPressed) {
@@ -113,12 +130,22 @@ void processInput(GLFWwindow *window) {
     bool bKeyIsPressed = glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS;
     if (bKeyIsPressed && !bKeyWasPressed) {
         cameraMode = !cameraMode;
-        if (cameraMode)
+        if (cameraMode || fpvActive)
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         else
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
     bKeyWasPressed = bKeyIsPressed;
+
+    bool fKeyIsPressed = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
+    if (fKeyIsPressed && !fKeyWasPressed) {
+        fpvActive = !fpvActive;
+        if (fpvActive)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        else if (!cameraMode)
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    }
+    fKeyWasPressed = fKeyIsPressed;
 }
 
 void drawCarriages(Shader &shader, Mesh &mesh, BezierCurve &curve, int numCarriages, float spacing, bool flatCurve) {
@@ -129,16 +156,24 @@ void drawCarriages(Shader &shader, Mesh &mesh, BezierCurve &curve, int numCarria
         glm::vec3 pos = curve.evaluate(t);
         glm::vec3 tangent = glm::normalize(curve.evaluateTangent(t));
 
+        // middle cart
+        if (fpvActive && i == numCarriages / 2) {
+            camera.Position = pos + glm::vec3(0.0f, 1.0f, 0.0f); // height offset
+        }
+
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, pos);
 
-        if (flatCurve) {
-            float angle = atan2(tangent.z, tangent.x);
-            model = glm::rotate(model, angle, glm::vec3(0.0f, -1.0f, 0.0f));
-        } else {
-            float angle = atan2(tangent.y, tangent.x);
-            model = glm::rotate(model, angle, glm::vec3(0.0f, 0.0f, 1.0f));
-        }
+        // Calculate rotation to face tangent
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::vec3 right = glm::normalize(glm::cross(tangent, up));
+        up = glm::normalize(glm::cross(right, tangent));
+
+        glm::mat4 rotation = glm::mat4(1.0f);
+        rotation[0] = glm::vec4(tangent, 0.0f);
+        rotation[1] = glm::vec4(up, 0.0f);
+        rotation[2] = glm::vec4(right, 0.0f);
+        model = model * rotation;
 
         model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
         shader.setMat4("model", model);
@@ -221,11 +256,11 @@ int main() {
 
     Mesh mesh(vertices, indices);
 
-    BezierCurve firstCurve = createFirstCurve();
-    BezierCurve secondCurve = createSecondCurve();
+    BezierCurve firstCurve = createFirstLoopCurve();
+    BezierCurve secondCurve = createSecondLoopCurve();
 
-    BezierCurveRenderer firstRenderer(firstCurve);
-    BezierCurveRenderer secondRenderer(secondCurve);
+    BezierCurveRenderer firstRenderer(firstCurve, 400);
+    BezierCurveRenderer secondRenderer(secondCurve, 400);
 
     BezierCurve *activeCurve = nullptr;
     BezierCurveRenderer *activeRenderer = nullptr;

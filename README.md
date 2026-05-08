@@ -12,6 +12,7 @@
 - Scroll: Zoom in and out
 - WASD/ZQSD: Move camera
 - B: Switch between camera mode and free look mode
+- F: Switch to first person camera mode on the carts
 - Left Mouse Click: Switch between flat and curved track (in camera mode with cursor on screen)
 - C: Switch between flat and curved track
 - Space: Move camera up
