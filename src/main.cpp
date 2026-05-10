@@ -285,12 +285,6 @@ int main() {
     Shader lineShader("src/shaders/color.vert", "src/shaders/color.frag");
     Shader lampShader("src/shaders/lamp.vert", "src/shaders/lamp.frag");
     Texture texture("src/resources/train-carriage.png");
-    Shader lampShader("src/shaders/lamp.vert", "src/shaders/lamp.frag");
-
-    glm::vec3 pointLightPositions[] = {
-        glm::vec3(-3.0f, 4.0f, 0.0f),
-        glm::vec3( 3.0f, 4.0f, 0.0f)
-    };
 
     glm::vec3 pointLightPositions[] = {glm::vec3(-3.0f, 4.0f, 0.0f), glm::vec3(3.0f, 4.0f, 0.0f)};
 
@@ -328,16 +322,15 @@ int main() {
     unsigned int lampVAO = setupLampVAO(mesh);
 
     // Lamp VAO — same VBO, just a different VAO
-    unsigned int lampVAO;
     glGenVertexArrays(1, &lampVAO);
     glBindVertexArray(lampVAO);
     glBindBuffer(GL_ARRAY_BUFFER, mesh.getVBO());
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
-    BezierCurve firstCurve = createFirstCurve();
-    BezierCurve secondCurve = createSecondCurve();
+    BezierCurve firstCurve = createFirstLoopCurve();
+    BezierCurve secondCurve = createSecondLoopCurve();
 
     BezierCurveRenderer firstRenderer(firstCurve, 400);
     BezierCurveRenderer secondRenderer(secondCurve, 400);
