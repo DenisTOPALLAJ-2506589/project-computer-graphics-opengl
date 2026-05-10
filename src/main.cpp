@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <string>
 #include <vector>
 
 #include "core/Window.h"
@@ -48,15 +49,63 @@ std::vector<glm::vec3> generateCircularLoopPoints(float r, float h) {
 }
 
 BezierCurve createFirstLoopCurve() {
-    BezierCurve curve(generateCircularLoopPoints(10.0f, 2.0f));
+    BezierCurve curve(generateCircularLoopPoints(10.0f, 2.0f)); // radius 10, height 2
     curve.buildLUT(400);
     return curve;
 }
 
 BezierCurve createSecondLoopCurve() {
-    BezierCurve curve(generateCircularLoopPoints(7.0f, 5.0f));
+    BezierCurve curve(generateCircularLoopPoints(7.0f, 5.0f)); // radius 7, height 5
     curve.buildLUT(400);
     return curve;
+}
+
+unsigned int setupLampVAO(Mesh &mesh) {
+    unsigned int lampVAO;
+    glGenVertexArrays(1, &lampVAO);
+    glBindVertexArray(lampVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.getVBO());
+    // Only need positions for the lamps
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+    return lampVAO;
+}
+
+void configureLighting(Shader &shader, glm::vec3 *lightPositions, glm::vec3 cameraPos) {
+    shader.use();
+    shader.setVec3("viewPos", cameraPos);
+    shader.setInt("material.diffuse", 0);
+    shader.setInt("material.specular", 0);
+    shader.setFloat("material.shininess", 32.0f);
+
+    for (int i = 0; i < 2; i++) {
+        std::string prefix = "pointLights[" + std::to_string(i) + "].";
+        shader.setVec3(prefix + "position", lightPositions[i]);
+        shader.setVec3(prefix + "ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+        shader.setVec3(prefix + "diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
+        shader.setVec3(prefix + "specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader.setFloat(prefix + "constant", 1.0f);
+        shader.setFloat(prefix + "linear", 0.09f);
+        shader.setFloat(prefix + "quadratic", 0.032f);
+    }
+}
+
+void renderLamps(Shader &lampShader, unsigned int vao, glm::vec3 *lightPositions, const glm::mat4 &view,
+                 const glm::mat4 &projection) {
+    lampShader.use();
+    lampShader.setMat4("view", view);
+    lampShader.setMat4("projection", projection);
+
+    glBindVertexArray(vao);
+    for (int i = 0; i < 2; i++) {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPositions[i]);
+        model = glm::scale(model, glm::vec3(0.2f));
+        lampShader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+    glBindVertexArray(0);
 }
 
 void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
@@ -164,7 +213,7 @@ void drawCarriages(Shader &shader, Mesh &mesh, BezierCurve &curve, int numCarria
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, pos);
 
-        // Calculate rotation to face tangent
+        // calc rotation to face tangent
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
         glm::vec3 right = glm::normalize(glm::cross(tangent, up));
         up = glm::normalize(glm::cross(right, tangent));
@@ -187,7 +236,7 @@ void handleSceneUpdate(Window &window, BezierCurve &firstCurve, BezierCurve &sec
     processInput(window.getHandle());
     checkButtonInteraction(window.getHandle(), window);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     activeCurve = usingSecondCurve ? &secondCurve : &firstCurve;
@@ -225,7 +274,7 @@ void drawButton(Shader &lineShader, Mesh &mesh, Window &window) {
 }
 
 int main() {
-    Window window(800, 600, "OpenGL Project");
+    Window window(800, 600, "Rollercoaster Scene");
     glfwSetCursorPosCallback(window.getHandle(), mouse_callback);
     glfwSetScrollCallback(window.getHandle(), scroll_callback);
     glfwSetInputMode(window.getHandle(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -234,27 +283,42 @@ int main() {
 
     Shader shader("src/shaders/basic.vert", "src/shaders/basic.frag");
     Shader lineShader("src/shaders/color.vert", "src/shaders/color.frag");
+    Shader lampShader("src/shaders/lamp.vert", "src/shaders/lamp.frag");
     Texture texture("src/resources/train-carriage.png");
 
+    glm::vec3 pointLightPositions[] = {glm::vec3(-3.0f, 4.0f, 0.0f), glm::vec3(3.0f, 4.0f, 0.0f)};
+
     std::vector<float> vertices = {
-        -1.0f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,  -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f,
-        1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f, -1.0f, -0.5f, -0.5f, 0.0f, 0.0f,
-        -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  -0.5f, 0.5f,  1.0f, 0.0f, 1.0f,  0.5f,  0.5f,  1.0f, 1.0f,
-        1.0f,  0.5f,  0.5f,  1.0f, 1.0f, -1.0f, 0.5f,  0.5f,  0.0f, 1.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f,
-        -1.0f, 0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.5f,  -0.5f, 1.0f, 1.0f, -1.0f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -1.0f, -0.5f, -0.5f, 0.0f, 1.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, -1.0f, 0.5f,  0.5f,  1.0f, 0.0f,
-        1.0f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 0.0f, 1.0f,
-        1.0f,  -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -1.0f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,  -0.5f, 0.5f,  1.0f, 0.0f,
-        1.0f,  -0.5f, 0.5f,  1.0f, 0.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, -1.0f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, 1.0f,  0.5f,  0.5f,  1.0f, 0.0f,
-        1.0f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.5f,  0.5f,  0.0f, 0.0f, -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f};
+        -1.0f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, 1.0f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 0.0f,
+        1.0f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f, 1.0f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 1.0f,
+        -1.0f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 1.0f, -1.0f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f,
+
+        -1.0f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+        1.0f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, 1.0f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+        -1.0f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f, -1.0f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+
+        -1.0f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f, -1.0f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,  1.0f, 1.0f,
+        -1.0f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f, -1.0f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f, 1.0f,
+        -1.0f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  0.0f, 0.0f, -1.0f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f, 0.0f,
+
+        1.0f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        1.0f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        1.0f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, 1.0f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+        -1.0f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  1.0f, 1.0f,
+        1.0f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f, 1.0f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f, 0.0f,
+        -1.0f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.0f, 0.0f, -1.0f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f, 1.0f,
+
+        -1.0f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+        1.0f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, 1.0f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        -1.0f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f, -1.0f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f, 1.0f};
 
     std::vector<unsigned int> indices;
-    for (int i = 0; i < vertices.size() / 5; i++)
+    for (int i = 0; i < vertices.size() / 8; i++)
         indices.push_back(i);
 
     Mesh mesh(vertices, indices);
+    unsigned int lampVAO = setupLampVAO(mesh);
 
     BezierCurve firstCurve = createFirstLoopCurve();
     BezierCurve secondCurve = createSecondLoopCurve();
@@ -273,17 +337,20 @@ int main() {
         handleSceneUpdate(window, firstCurve, secondCurve, firstRenderer, secondRenderer, activeCurve, activeRenderer);
 
         renderBezierPath(lineShader, *activeRenderer, window);
-
-        shader.use();
-        shader.setMat4("projection",
-                       glm::perspective(glm::radians(camera.Zoom), (float)window.getWidth() / (float)window.getHeight(),
-                                        0.1f, 100.0f));
-        shader.setMat4("view", camera.GetViewMatrix());
-        texture.bind();
-
         drawButton(lineShader, mesh, window);
 
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),
+                                                (float)window.getWidth() / (float)window.getHeight(), 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+
+        configureLighting(shader, pointLightPositions, camera.Position);
+        shader.setMat4("projection", projection);
+        shader.setMat4("view", view);
+
+        texture.bind();
         drawCarriages(shader, mesh, *activeCurve, numCarriages, carriageSpacing, usingSecondCurve);
+
+        renderLamps(lampShader, lampVAO, pointLightPositions, view, projection);
 
         window.swapBuffers();
         window.pollEvents();
