@@ -7,6 +7,7 @@ class Mesh {
     ~Mesh();
 
     void draw() const;
+    unsigned int getVBO() const { return VBO; }
 
   private:
     unsigned int VAO = 0, VBO = 0, EBO = 0;

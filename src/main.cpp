@@ -142,26 +142,79 @@ int main() {
     Shader shader("src/shaders/basic.vert", "src/shaders/basic.frag");
     Shader lineShader("src/shaders/color.vert", "src/shaders/color.frag");
     Texture texture("src/resources/train-carriage.png");
+    Shader lampShader("src/shaders/lamp.vert", "src/shaders/lamp.frag");
+
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3(-3.0f, 4.0f, 0.0f),
+        glm::vec3( 3.0f, 4.0f, 0.0f)
+    };
 
     std::vector<float> vertices = {
-        -1.0f, -0.5f, -0.5f, 0.0f, 0.0f, 1.0f,  -0.5f, -0.5f, 1.0f, 0.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f,
-        1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f, -1.0f, -0.5f, -0.5f, 0.0f, 0.0f,
-        -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  -0.5f, 0.5f,  1.0f, 0.0f, 1.0f,  0.5f,  0.5f,  1.0f, 1.0f,
-        1.0f,  0.5f,  0.5f,  1.0f, 1.0f, -1.0f, 0.5f,  0.5f,  0.0f, 1.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f,
-        -1.0f, 0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.5f,  -0.5f, 1.0f, 1.0f, -1.0f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -1.0f, -0.5f, -0.5f, 0.0f, 1.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, -1.0f, 0.5f,  0.5f,  1.0f, 0.0f,
-        1.0f,  0.5f,  0.5f,  1.0f, 0.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 0.0f, 1.0f,
-        1.0f,  -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  -0.5f, 0.5f,  0.0f, 0.0f, 1.0f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -1.0f, -0.5f, -0.5f, 0.0f, 1.0f, 1.0f,  -0.5f, -0.5f, 1.0f, 1.0f, 1.0f,  -0.5f, 0.5f,  1.0f, 0.0f,
-        1.0f,  -0.5f, 0.5f,  1.0f, 0.0f, -1.0f, -0.5f, 0.5f,  0.0f, 0.0f, -1.0f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f, 1.0f,  0.5f,  -0.5f, 1.0f, 1.0f, 1.0f,  0.5f,  0.5f,  1.0f, 0.0f,
-        1.0f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f, 0.5f,  0.5f,  0.0f, 0.0f, -1.0f, 0.5f,  -0.5f, 0.0f, 1.0f};
+        // positions          // normals           // texcoords
+        // Back face
+        -1.0f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+         1.0f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        -1.0f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+        -1.0f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
+        // Front face
+        -1.0f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+         1.0f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,
+         1.0f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+         1.0f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,
+        -1.0f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,
+
+        // Left face
+        -1.0f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        -1.0f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        -1.0f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -1.0f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -1.0f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        -1.0f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+        // Right face
+         1.0f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+         1.0f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+         1.0f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         1.0f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         1.0f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+         1.0f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+
+        // Bottom face
+        -1.0f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+         1.0f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+         1.0f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+         1.0f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+        -1.0f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+        -1.0f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+
+        // Top face
+        -1.0f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+         1.0f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+         1.0f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+         1.0f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        -1.0f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+        -1.0f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+    };
+
+    // Generate sequential indices (36 vertices, no sharing needed)
     std::vector<unsigned int> indices;
-    for (int i = 0; i < vertices.size() / 5; i++)
+    for (unsigned int i = 0; i < 36; i++)
         indices.push_back(i);
 
     Mesh mesh(vertices, indices);
+
+    // Lamp VAO — same VBO, just a different VAO
+    unsigned int lampVAO;
+    glGenVertexArrays(1, &lampVAO);
+    glBindVertexArray(lampVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.getVBO());
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
 
     BezierCurve firstCurve = createFirstCurve();
     BezierCurve secondCurve = createSecondCurve();
@@ -183,12 +236,53 @@ int main() {
 
         shader.use();
         shader.setMat4("projection",
-                       glm::perspective(glm::radians(camera.Zoom), (float)window.getWidth() / (float)window.getHeight(),
-                                        0.1f, 100.0f));
+                   glm::perspective(glm::radians(camera.Zoom), (float)window.getWidth() / (float)window.getHeight(),
+                        0.1f, 100.0f));
         shader.setMat4("view", camera.GetViewMatrix());
-        texture.bind();
 
-        drawCarriages(shader, mesh, *activeCurve, numCarriages, carriageSpacing, usingSecondCurve);
+        shader.setVec3("viewPos", camera.Position);
+
+        shader.setInt("material.diffuse",  0);
+        shader.setInt("material.specular", 0);
+        shader.setFloat("material.shininess", 32.0f);
+
+        // LIGHTS
+        // Point light 0 — left side, above the track
+        shader.setVec3("pointLights[0].position",  glm::vec3(-3.0f, 4.0f, 0.0f));
+        shader.setVec3("pointLights[0].ambient",   glm::vec3(0.1f, 0.1f, 0.1f));
+        shader.setVec3("pointLights[0].diffuse",   glm::vec3(0.8f, 0.8f, 0.8f));
+        shader.setVec3("pointLights[0].specular",  glm::vec3(1.0f, 1.0f, 1.0f));
+        shader.setFloat("pointLights[0].constant",  1.0f);
+        shader.setFloat("pointLights[0].linear",    0.09f);
+        shader.setFloat("pointLights[0].quadratic", 0.032f);
+
+        // Point light 1 — right side, above the track
+        shader.setVec3("pointLights[1].position",  glm::vec3(3.0f, 4.0f, 0.0f));
+        shader.setVec3("pointLights[1].ambient",   glm::vec3(0.1f, 0.1f, 0.1f));
+        shader.setVec3("pointLights[1].diffuse",   glm::vec3(0.8f, 0.8f, 0.8f));
+        shader.setVec3("pointLights[1].specular",  glm::vec3(1.0f, 1.0f, 1.0f));
+        shader.setFloat("pointLights[1].constant",  1.0f);
+        shader.setFloat("pointLights[1].linear",    0.09f);
+        shader.setFloat("pointLights[1].quadratic", 0.032f);
+
+        texture.bind();
+        drawCarriages(shader, mesh, *activeCurve, numCarriages, carriageSpacing, !usingSecondCurve);
+
+        lampShader.use();
+        lampShader.setMat4("projection", glm::perspective(glm::radians(camera.Zoom),
+            (float)window.getWidth() / (float)window.getHeight(), 0.1f, 100.0f));
+        lampShader.setMat4("view", camera.GetViewMatrix());
+
+        // Draw lamps at light positions
+        glBindVertexArray(lampVAO);
+        for (int i = 0; i < 2; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, pointLightPositions[i]);
+            model = glm::scale(model, glm::vec3(0.2f));
+            lampShader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+        glBindVertexArray(0);
 
         window.swapBuffers();
         window.pollEvents();
