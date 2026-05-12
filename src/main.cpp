@@ -79,7 +79,7 @@ void configureLighting(Shader &shader, glm::vec3 *lightPositions, glm::vec3 came
     shader.setInt("material.specular", 0);
     shader.setFloat("material.shininess", 32.0f);
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 8; i++) {
         std::string prefix = "pointLights[" + std::to_string(i) + "].";
         shader.setVec3(prefix + "position", lightPositions[i]);
         shader.setVec3(prefix + "ambient", glm::vec3(0.1f, 0.1f, 0.1f));
@@ -98,7 +98,7 @@ void renderLamps(Shader &lampShader, unsigned int vao, glm::vec3 *lightPositions
     lampShader.setMat4("projection", projection);
 
     glBindVertexArray(vao);
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 8; i++) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, lightPositions[i]);
         model = glm::scale(model, glm::vec3(0.2f));
@@ -286,7 +286,12 @@ int main() {
     Shader lampShader("src/shaders/lamp.vert", "src/shaders/lamp.frag");
     Texture texture("src/resources/train-carriage.png");
 
-    glm::vec3 pointLightPositions[] = {glm::vec3(-3.0f, 4.0f, 0.0f), glm::vec3(3.0f, 4.0f, 0.0f)};
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3(-10.0f, 1.0f, 0.0f), glm::vec3(10.0f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, -10.0f), glm::vec3(0.0f, 1.0f, 10.0f),
+        glm::vec3(-10.0f, 1.0f, -10.0f), glm::vec3(10.0f, 1.0f, -10.0f),
+        glm::vec3(-10.0f, 1.0f, 10.0f), glm::vec3(10.0f, 1.0f, 10.0f)
+    };
 
     std::vector<float> vertices = {
         -1.0f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, 1.0f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 0.0f,
