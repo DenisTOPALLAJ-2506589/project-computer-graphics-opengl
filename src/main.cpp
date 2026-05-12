@@ -80,7 +80,7 @@ void configureLighting(Shader &shader, glm::vec3 *lightPositions, glm::vec3 came
     shader.setInt("material.specular", 0);
     shader.setFloat("material.shininess", 32.0f);
 
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 4; i++) {
         std::string prefix = "pointLights[" + std::to_string(i) + "].";
         shader.setVec3(prefix + "position", lightPositions[i]);
         shader.setVec3(prefix + "ambient", glm::vec3(0.1f, 0.1f, 0.1f));
@@ -99,7 +99,7 @@ void renderLamps(Shader &lampShader, unsigned int vao, glm::vec3 *lightPositions
     lampShader.setMat4("projection", projection);
 
     glBindVertexArray(vao);
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 4; i++) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, lightPositions[i]);
         model = glm::scale(model, glm::vec3(0.2f));
@@ -288,7 +288,7 @@ int main() {
     Texture texture("src/resources/train-carriage.png");
 
     Framebuffer screenFBO(window.getWidth(), window.getHeight());
-    Shader screenShader("src/shaders/post.vert", "src/shaders/post.frag");
+    Shader screenShader("src/shaders/post.vert", "src/shaders/post_sharpen.frag");
 
     float quadVertices[] = {
         -1.0f, 1.0f,  0.0f, 1.0f,
@@ -312,10 +312,8 @@ int main() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
 
     glm::vec3 pointLightPositions[] = {
-        glm::vec3(-10.0f, 1.0f, 0.0f), glm::vec3(10.0f, 1.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, -10.0f), glm::vec3(0.0f, 1.0f, 10.0f),
-        glm::vec3(-10.0f, 1.0f, -10.0f), glm::vec3(10.0f, 1.0f, -10.0f),
-        glm::vec3(-10.0f, 1.0f, 10.0f), glm::vec3(10.0f, 1.0f, 10.0f)
+        glm::vec3(-8.5f, 1.0f, 0.0f), glm::vec3(8.5f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, -8.5f), glm::vec3(0.0f, 1.0f, 8.5f)
     };
 
     std::vector<float> vertices = {

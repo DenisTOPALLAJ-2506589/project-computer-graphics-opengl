@@ -20,13 +20,13 @@ void main()
         vec2( 0.0f,   -offset), // bottom-center
         vec2( offset, -offset)  // bottom-right    
     );
-    // Gaussian blur kernel
-    float kernel[9] = float[](
-        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0,
-        2.0 / 16.0, 4.0 / 16.0, 2.0 / 16.0,
-        1.0 / 16.0, 2.0 / 16.0, 1.0 / 16.0
-    ); 
-    
+    // Sharpen kernel
+   float kernel[9] = float[](
+        -0.5, -1.0, -0.5,
+        -1.0,  7.0, -1.0,
+        -0.5, -1.0, -0.5
+    );
+
     vec3 sampleTex[9];
     for(int i = 0; i < 9; i++)
     {
