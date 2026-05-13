@@ -231,6 +231,35 @@ void drawCarriages(Shader &shader, Mesh &mesh, BezierCurve &curve, int numCarria
     }
 }
 
+void drawRailroad(Shader &shader, Mesh &mesh, BezierCurve &curve, float interval = 0.5f) {
+    shader.use();
+    shader.setVec3("color", glm::vec3(0.3f, 0.2f, 0.1f));
+
+    float totalLength = curve.getTotalLength();
+    for (float d = 0.0f; d < totalLength; d += interval) {
+        float t = curve.getTFromDistance(d);
+        glm::vec3 pos = curve.evaluate(t);
+        glm::vec3 tangent = glm::normalize(curve.evaluateTangent(t));
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, pos - glm::vec3(0.0f, 0.3f, 0.0f));
+
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::vec3 right = glm::normalize(glm::cross(tangent, up));
+        up = glm::normalize(glm::cross(right, tangent));
+
+        glm::mat4 rotation = glm::mat4(1.0f);
+        rotation[0] = glm::vec4(tangent, 0.0f);
+        rotation[1] = glm::vec4(up, 0.0f);
+        rotation[2] = glm::vec4(right, 0.0f);
+        model = model * rotation;
+
+        model = glm::scale(model, glm::vec3(0.1f, 0.05f, 0.8f));
+        shader.setMat4("model", model);
+        mesh.draw();
+    }
+}
+
 void handleSceneUpdate(Window &window, BezierCurve &firstCurve, BezierCurve &secondCurve,
                        BezierCurveRenderer &firstRenderer, BezierCurveRenderer &secondRenderer,
                        BezierCurve *&activeCurve, BezierCurveRenderer *&activeRenderer) {
@@ -290,15 +319,9 @@ int main() {
     Framebuffer screenFBO(window.getWidth(), window.getHeight());
     Shader screenShader("src/shaders/post.vert", "src/shaders/post_sharpen.frag");
 
-    float quadVertices[] = {
-        -1.0f, 1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f, 0.0f,
-        1.0f,  -1.0f, 1.0f, 0.0f,
+    float quadVertices[] = {-1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
 
-        -1.0f, 1.0f,  0.0f, 1.0f,
-        1.0f,  -1.0f, 1.0f, 0.0f,
-        1.0f,  1.0f,  1.0f, 1.0f
-    };
+                            -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f};
 
     unsigned int quadVAO, quadVBO;
     glGenVertexArrays(1, &quadVAO);
@@ -311,10 +334,8 @@ int main() {
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
 
-    glm::vec3 pointLightPositions[] = {
-        glm::vec3(-8.5f, 1.0f, 0.0f), glm::vec3(8.5f, 1.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, -8.5f), glm::vec3(0.0f, 1.0f, 8.5f)
-    };
+    glm::vec3 pointLightPositions[] = {glm::vec3(-8.5f, 1.0f, 0.0f), glm::vec3(8.5f, 1.0f, 0.0f),
+                                       glm::vec3(0.0f, 1.0f, -8.5f), glm::vec3(0.0f, 1.0f, 8.5f)};
 
     std::vector<float> vertices = {
         -1.0f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, 1.0f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 0.0f,
@@ -379,6 +400,7 @@ int main() {
 
         renderBezierPath(lineShader, *activeRenderer, window);
         drawButton(lineShader, mesh, window);
+        drawRailroad(lineShader, mesh, *activeCurve, 0.6f);
 
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom),
                                                 (float)window.getWidth() / (float)window.getHeight(), 0.1f, 100.0f);
