@@ -9,87 +9,95 @@
 ## Intro
 
 **Denis:**
-> We hebben een 3D-omgeving gebouwd in OpenGL met C++ waarbij een trein over een traject van Bézier-curves rijdt.
 
----
+> We hebben een 3D-omgeving gebouwd in OpenGL met C++ waarbij we een trein over een traject van Bézier-curves laten rijden.
 
 ## Feature 1 – Bézier-curves
 
 **Denis:**
-> We starten met de curves. Het traject van de trein is opgebouwd uit een aaneenschakeling van kubische Bézier-segmenten die samen een gesloten lus vormen. De scène bevat twee verschillende lussen — één met een grote straal en één met een kleinere maar steilere lus. De controlepunten worden procedureel gegenereerd met de bekende benadering `k = 0.552 * r`, zodat vier kubische segmenten samen een volledige cirkel benaderen. Je ziet het traject hier als een witte lijn, opgebouwd uit 400 samplepunten.
 
-*(Toon de witte curvelijnen in de scène.)*
+> Onze eerste feature zijn de Bézier-curves. Het traject van de trein is opgebouwd uit een aaneenschakeling van kubische Bézier-segmenten die samen een gesloten lus vormen. De scène bevat twee verschillende lussen — één met een grote straal en één met een kleinere maar steilere lus. Om een volledige lus te benaderen wordt er gebruik gemaakt van een waarde die u op het scherm ziet. Aan de hand van deze waarde en een straal, worden er vier kubische segmenten gemaakt zodat het einde van een vorig segment precies samenvalt met het begin van het volgend segment.
+
+_(Toon de witte curvelijnen in de scène.)_
 
 ---
 
 ## Feature 2 – Animatie met constante snelheid
 
 **Denis:**
-> Als we de trein gewoon met een constante verhoging van parameter *t* over de curve laten rijden, dan merken we dat de snelheid niet constant is — het object versnelt en vertraagt afhankelijk van de vorm van de curve. Om dit op te lossen hebben we per curve een **look-up table** opgebouwd die de booglengte koppelt aan de curvewaarde *t*. Elke frame hogen we een afstandsaccumulator op met `deltaTime * 5` eenheden per seconde. Via lineaire interpolatie in die tabel halen we het correcte *t*-waarde op, zodat de trein altijd met een constante snelheid rijdt.
 
-*(Demonstreer de trein die vloeiend en gelijkmatig beweegt langs het traject.)*
+> Onze tweede feature is de animatie met constante snelheid via **Arc Length Parametrization**. Omdat de parameter *t* de curve niet lineair doorloopt, bouwen we een **Look-Up Table (LUT)** van 400 samples die de afgelegde afstand koppelt aan *t*. In de render-loop verhogen we een afstand-accumulator met `snelheid * deltaTime`. De functie `getTFromDistance()` gebruikt vervolgens **lineaire interpolatie** in de Look-Up Table om de exacte *t*-waarde te vinden voor de huidige afstand, wat resulteert in een perfect gelijkmatige beweging.
+
+_(Demonstreer de trein die vloeiend en gelijkmatig beweegt langs het traject.)_
 
 ---
 
 ## Feature 3 – 3D-modellen en texturen
 
 **Denis:**
-> De trein zelf is een rechthoekig boxmodel opgebouwd uit 36 vertices met posities, normaalvectoren en UV-coördinaten. Een PNG-textuur van een treinwagon wordt ingeladen via de `stb_image` library en op het materiaal toegepast in de fragment shader. Hetzelfde boxmodel wordt hergebruikt voor de dwarsliggers van het spoor en voor de oranje wisselknop in de scène.
 
-*(Toon het treinmodel en de textuur van dichtbij.)*
+> Voor de 3D-modellen gebruiken we een box-mesh van 36 vertices. Elke vertex bevat een **positie, normaalvector en UV-coördinaat**. De texturen laden we in via de `stb_image` library.
+
+_(Toon het treinmodel en de textuur van dichtbij.)_
 
 ---
 
 ## Feature 4 – Visualisatie van het spoor
 
 **Denis:**
-> Eén van de mooiste onderdelen is het **treinspoor dat meebuigt met de Bézier-curve**. De functie `drawRailroad()` plaatst om de 0,6 booglengte-eenheden een afgeplatte box als dwarsligger. Voor elke positie berekenen we het lokale Frenet-frame — tangent, up en right — en bouwen we hieruit een rotatiematrix. Die matrix oriënteert de dwarsligger zodat hij altijd loodrecht op de rijrichting staat. Het resultaat is een spoor dat automatisch meebuigt doorheen elke bocht en stijging.
 
-*(Toon het spoor dat vloeiend meebuigt doorheen de scène.)*
+> De spoorvisualisatie in de functie `drawRailroad()` werkt door het berekenen van een **lokaal coördinatensysteem** op de curve. Per stap evalueren we de **tangens** (afgeleide) van de curve als de voorwaartse vector. Via kruisproducten met de *up-vector* bepalen we de *right-vector*, waarna we een nieuwe *up-vector* berekenen voor een orthogonaal systeem. Deze drie vectoren vormen de basis van een **4x4 rotatiematrix** die we meegeven aan de shader om elke dwarsligger correct te oriënteren ten opzichte van de baan.
+
+_(Toon het spoor dat vloeiend meebuigt doorheen de scène.)_
 
 ---
 
 ## Feature 5 – Camera: overzicht & first-person
 
 **Denis:**
-> We hebben drie camera-modi geïmplementeerd. In de **standaard modus** beweeg je vrij door de scène met WASD en kijk je rond door de rechtermuisknop ingedrukt te houden. Door op **B** te drukken schakel je de vrije-vliegmodus in met muisbesturing. Door op **F** te drukken activeer je de **first-person camera**, die vergrendeld is aan de middelste wagon. Je ziet het traject dan vanuit het perspectief van de rijdende trein, wat een heel andere beleving geeft.
 
-*(Schakel tussen de camera-modi tijdens de demonstratie.)*
+> Onze camera ondersteunt drie modi. De berekening van de camera-vectoren gebeurt via Euler-hoeken (Yaw en Pitch), die we omzetten naar een **Front-vector** via goniometrische functies. In de **vrij-beweegbare modus** vangen we muis-offsets op via de `glfw` library. Voor de **First-Person View (FPV)** koppelen we de camerapositie direct aan de positie van de middelste wagon op de Bézier-curve, inclusief een hoogte-offset van 1.0 eenheid boven de baan, anders kom je in de trein terecht.
+
+_(Schakel tussen de camera-modi tijdens de demonstratie.)_
 
 ---
 
 ## Feature 6 – Belichting
 
 **Maxim:**
-> Nu neem ik het over voor de belichting. Er zijn **vier punt-lichtbronnen** symmetrisch rond het spoor geplaatst op posities (+/-8.5, 1, 0) en (0, 1, +/-8.5). De belichting is volledig geïmplementeerd als **per-pixel Phong shading** in de fragment shader — zo wordt voor elke pixel het ambient-, diffuse- en speculaire licht berekend. Elke lichtbron heeft ook **kwadratische attenuatie**, zodat de intensiteit realistisch afneemt met de afstand. De kleine kubusvormige lichtbronnen zijn zichtbaar als witte blokjes in de scène.
 
-*(Toon de lichtbronnen naast het spoor en de belichting op de trein.)*
+> De belichting is gebaseerd op het **Phong-reflectiemodel**, geïmplementeerd in de fragment shader. We gebruiken **vier puntlichten** gedefinieerd in een array van structs. Voor elk licht berekenen we de ambient, diffuse en speculaire componenten op basis van de materiaal-eigenschappen en de `viewPos`. Om realisme toe te voegen passen we **kwadratische attenuatie** toe, waardoor het licht vloeiend wegvalt naarmate de afstand tot de bron groter wordt.
+
+_(Toon de lichtbronnen naast het spoor en de belichting op de trein.)_poor en de belichting op de trein.)_
 
 ---
 
 ## Feature 7 – Convolutie-shader
 
 **Maxim:**
-> Vervolgens hebben we een **post-processing pipeline** opgebouwd. De scène wordt eerst volledig gerenderd naar een **Framebuffer Object (FBO)**. De kleurenbuffer van die FBO gebruiken we daarna als textuur op een screen-aligned quad. Op die quad passen we de `post_sharpen.frag` shader toe, die een **3x3 convolutiekernel** toepast over elk pixel. De gehanteerde kernel is een **verscherpingskernel**, met een centrale gewichtsfactor van 7 en negatieve buurbijdragen. Dit verbetert de helderheid van randen en details in het volledige gerenderde beeld.
 
-*(Toon het resultaat met de verscherpingsfilter actief.)*
+> Als zevende feature hebben we een **post-processing convolutieshader** geïmplementeerd. Dit werkt via een **tweefasen-aanpak**. In de eerste fase renderen we de scène naar een **Framebuffer Object (FBO)**. In de tweede fase tekenen we een **screen-aligned quad**, wat een rechthoek van twee driehoeken in Normalized Device Coordinates (NDC) is, dus van -1 tot +1. De fragment shader sampelt de kleurbuffer van de FBO met de `texture()` functie en past een **3×3 convolutiekernel** toe. Onze **verscherpingskernel**, met een centrumgewicht van 7, versterkt contrasten tussen naburige pixels voor een scherper eindresultaat.
+
+_(Toon het resultaat met de verscherpingsfilter actief.)_
 
 ---
 
 ## Feature 10 – Interactie via Picking
 
 **Maxim:**
-> Als laatste interactiemogelijkheid demonstreer ik de **wisselspoor-interactie**. Je kunt van traject wisselen op twee manieren: door op de **C-toets** te drukken, of door met de muis op de **oranje wisselknop** in de scène te klikken. Die knop staat opsteld in de 3D-wereld op positie (0, 3, 0). Bij een muisklik projecteren we die positie naar schermcoördinaten via `glm::project()` en vergelijken we de pixelafstand met de muiscursor — als die kleiner is dan 25 pixels, wisselt de trein van lus. De afstandsaccumulator wordt hierbij gereset naar 0.
 
-*(Klik op de oranje knop en druk op C om te tonen hoe de trein van traject wisselt.)*
+> Tot slot de interactie via **picking**. Om de 3D-positie van de oranje knop te koppelen aan een muisklik, gebruiken we `glm::project()` zodat we de world-space coördinaten kunnen transformeren naar **schermcoördinaten**. Daarbij inverteren we de Y-as omdat OpenGL zijn oorsprong linksonder plaatst, terwijl Window-coördinaten linksboven beginnen. Als de afstand tussen de cursor en de geprojecteerde positie kleiner is dan 25 pixels, wisselen we van traject en resetten we de `bezierDistance`, zodat de trein netjes aan het begin van de nieuwe lus start. Dit kan gebeuren aan de hand van de muisklik op het oranje object of door op de C-toets te drukken.
+
+_(Klik op de oranje knop en druk op C om te tonen hoe de trein van traject wisselt.)_
 
 ---
 
 ## Afsluiting
 
 **Maxim:**
-> Dat was een overzicht van alle geïmplementeerde features van ons project: Bézier-curves met constante-snelheidsanimatie, een getextureerd treinmodel, een visueel spoor dat meebuigt met de curve, meerdere camera-modi, per-pixel belichting, een post-processing convolutie-shader en interactieve trajectwisseling.
+
+> We hebben het volgende niet gedaan, namelijk het Post-processing met een Bloom/Neon of Halo effect en Chroma-keying. Dit kwam omdat we niet genoeg tijd hadden om dit te implementeren. Bedankt voor uw aandacht.
 
 ---
 
-*Einde van het videoscript.*
+_Einde van het videoscript._
