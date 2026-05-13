@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "core/Window.h"
+#include "renderer/Framebuffer.h"
 #include "renderer/Mesh.h"
 #include "renderer/Shader.h"
 #include "renderer/Texture.h"
@@ -79,7 +80,7 @@ void configureLighting(Shader &shader, glm::vec3 *lightPositions, glm::vec3 came
     shader.setInt("material.specular", 0);
     shader.setFloat("material.shininess", 32.0f);
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 4; i++) {
         std::string prefix = "pointLights[" + std::to_string(i) + "].";
         shader.setVec3(prefix + "position", lightPositions[i]);
         shader.setVec3(prefix + "ambient", glm::vec3(0.1f, 0.1f, 0.1f));
@@ -98,7 +99,7 @@ void renderLamps(Shader &lampShader, unsigned int vao, glm::vec3 *lightPositions
     lampShader.setMat4("projection", projection);
 
     glBindVertexArray(vao);
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 4; i++) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, lightPositions[i]);
         model = glm::scale(model, glm::vec3(0.2f));
@@ -286,7 +287,34 @@ int main() {
     Shader lampShader("src/shaders/lamp.vert", "src/shaders/lamp.frag");
     Texture texture("src/resources/train-carriage.png");
 
-    glm::vec3 pointLightPositions[] = {glm::vec3(-3.0f, 4.0f, 0.0f), glm::vec3(3.0f, 4.0f, 0.0f)};
+    Framebuffer screenFBO(window.getWidth(), window.getHeight());
+    Shader screenShader("src/shaders/post.vert", "src/shaders/post_sharpen.frag");
+
+    float quadVertices[] = {
+        -1.0f, 1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f,
+        1.0f,  -1.0f, 1.0f, 0.0f,
+
+        -1.0f, 1.0f,  0.0f, 1.0f,
+        1.0f,  -1.0f, 1.0f, 0.0f,
+        1.0f,  1.0f,  1.0f, 1.0f
+    };
+
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3(-8.5f, 1.0f, 0.0f), glm::vec3(8.5f, 1.0f, 0.0f),
+        glm::vec3(0.0f, 1.0f, -8.5f), glm::vec3(0.0f, 1.0f, 8.5f)
+    };
 
     std::vector<float> vertices = {
         -1.0f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f, 0.0f, 1.0f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f, 0.0f,
@@ -343,6 +371,10 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        // first pass
+        screenFBO.bind();
+        glEnable(GL_DEPTH_TEST);
+
         handleSceneUpdate(window, firstCurve, secondCurve, firstRenderer, secondRenderer, activeCurve, activeRenderer);
 
         renderBezierPath(lineShader, *activeRenderer, window);
@@ -360,6 +392,17 @@ int main() {
         drawCarriages(shader, mesh, *activeCurve, numCarriages, carriageSpacing, usingSecondCurve);
 
         renderLamps(lampShader, lampVAO, pointLightPositions, view, projection);
+
+        // second pass with texture
+        screenFBO.unbind();
+        glDisable(GL_DEPTH_TEST);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        screenShader.use();
+        glBindVertexArray(quadVAO);
+        glBindTexture(GL_TEXTURE_2D, screenFBO.textureColorbuffer);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         window.swapBuffers();
         window.pollEvents();
