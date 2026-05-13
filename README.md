@@ -19,6 +19,15 @@
 - Shift: Move camera down
 - ESC: Close the application
 
+## Documentation
+
+- [Report](report.pdf): contains the implementation details of all features done or not done and how long each person worked on this project per day, per hour
+- [video-script](video-script.md): contains the script for the video we made.
+
+## Video
+
+The video is available on youtube: TODO
+
 ## Authors
 
 Denis Topallaj & Maxim Peeters
