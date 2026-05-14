@@ -10,13 +10,15 @@
 
 **Denis:**
 
-> We hebben een 3D-omgeving gebouwd in OpenGL met C++ waarbij we een trein over een traject van Bézier-curves laten rijden.
+> Welkom bij onze presentatie over ons OpenGL-project. Voor dit vak hebben we een dynamische 3D-omgeving ontwikkeld in C++. De kern van onze applicatie draait om een trein die over een complex traject van Bézier-curves rijdt. We hebben ons gefocust op zowel technische accuraatheid in de wiskunde achter de curves als op een visueel aantrekkelijke weergave met verschillende camera-standpunten en belichtingseffecten.
 
 ## Feature 1 – Bézier-curves
 
 **Denis:**
 
-> Onze eerste feature zijn de Bézier-curves. Het traject van de trein is opgebouwd uit een aaneenschakeling van kubische Bézier-segmenten die samen een gesloten lus vormen. De scène bevat twee verschillende lussen — één met een grote straal en één met een kleinere maar steilere lus. Om een volledige lus te benaderen wordt er gebruik gemaakt van een waarde die u op het scherm ziet. Aan de hand van deze waarde en een straal, worden er vier kubische segmenten gemaakt zodat het einde van een vorig segment precies samenvalt met het begin van het volgend segment.
+> Onze eerste belangrijke feature is de implementatie van de Bézier-curves. Het traject dat de trein volgt is niet zomaar een simpele cirkel, maar een aaneenschakeling van meerdere kubische Bézier-segmenten die naadloos op elkaar aansluiten om een gesloten lus te vormen. In de scène zie je twee verschillende trajecten: een wijde lus met lichte hoogteverschillen en een kleinere, meer uitdagende route met steilere hellingen. 
+
+> Om deze lussen wiskundig correct te benaderen, maken we gebruik van een specifieke constante voor cirkelbenadering, gevormd door de verhouding tussen de straal van de cirkel en de lengte van de controlepunten. De formule is te zien op uw scherm. Hiermee berekenen we de controlepunten voor vier segmenten per curve, zodat de overgangen continu zijn en de trein geen schokken vertoont bij het passeren van de knooppunten.
 
 _(Toon de witte curvelijnen in de scène.)_
 
@@ -26,7 +28,9 @@ _(Toon de witte curvelijnen in de scène.)_
 
 **Denis:**
 
-> Onze tweede feature is de animatie met constante snelheid via **Arc Length Parametrization**. Omdat de parameter *t* de curve niet lineair doorloopt, bouwen we een **Look-Up Table (LUT)** van 400 samples die de afgelegde afstand koppelt aan *t*. In de render-loop verhogen we een afstand-accumulator met `snelheid * deltaTime`. De functie `getTFromDistance()` gebruikt vervolgens **lineaire interpolatie** in de Look-Up Table om de exacte *t*-waarde te vinden voor de huidige afstand, wat resulteert in een perfect gelijkmatige beweging.
+> Een uitdaging bij Bézier-curves is dat de parameter *t* de curve niet met een constante snelheid doorloopt; in scherpere bochten zou de trein normaal gesproken vertragen of versnellen. Om dit op te lossen hebben we **Arc Length Parametrization** toegepast. 
+
+> We bouwen bij het opstarten een **Look-Up Table (LUT)** op met 400 samples, die de cumulatieve booglengte koppelt aan de parameter *t*. Tijdens het renderen houden we de afgelegde afstand bij op basis van de verstreken tijd. Met de functie `getTFromDistance()` zoeken we vervolgens via **lineaire interpolatie** de corresponderende *t*-waarde in onze tabel. Dit zorgt ervoor dat de trein, ongeacht de kromming van de baan, met een perfect constante snelheid van precies 5 eenheden per seconde blijft rijden.
 
 _(Demonstreer de trein die vloeiend en gelijkmatig beweegt langs het traject.)_
 
@@ -36,7 +40,9 @@ _(Demonstreer de trein die vloeiend en gelijkmatig beweegt langs het traject.)_
 
 **Denis:**
 
-> Voor de 3D-modellen gebruiken we een box-mesh van 36 vertices. Elke vertex bevat een **positie, normaalvector en UV-coördinaat**. De texturen laden we in via de `stb_image` library.
+> Wat betreft de visualisatie maken we gebruik van modulaire 3D-modellen. We hebben een 'Mesh'-klasse geschreven die vertex-data inlaadt, bestaande uit **posities, normalen voor de belichting en UV-coördinaten voor de texturen**. De treinwagon die je hier ziet, is een geëxtrudeerde box-mesh die we hergebruiken voor alle zes de wagons. 
+
+> Voor de textures gebruiken we de `stb_image` bibliotheek om PNG-bestanden in te laden en te binden aan de OpenGL texture units.
 
 _(Toon het treinmodel en de textuur van dichtbij.)_
 
@@ -56,7 +62,9 @@ _(Toon het spoor dat vloeiend meebuigt doorheen de scène.)_
 
 **Denis:**
 
-> Onze camera ondersteunt drie modi. De berekening van de camera-vectoren gebeurt via Euler-hoeken (Yaw en Pitch), die we omzetten naar een **Front-vector** via goniometrische functies. In de **vrij-beweegbare modus** vangen we muis-offsets op via de `glfw` library. Voor de **First-Person View (FPV)** koppelen we de camerapositie direct aan de positie van de middelste wagon op de Bézier-curve, inclusief een hoogte-offset van 1.0 eenheid boven de baan, anders kom je in de trein terecht.
+> Ten slotte hebben we een flexibel camerasysteem geïmplementeerd. De gebruiker kan met de toetsen **B** en **F** wisselen tussen verschillende modi. In de **Free-look modus** kun je vrij door de scène vliegen met WASD of ZQSD, waarbij de kijkrichting wordt berekend op basis van muisbewegingen en Euler-hoeken. 
+
+> De meest immersieve stand is echter de **First-Person View**. Hierbij 'locken' we de camera direct op de middelste wagon van de trein. We gebruiken de positie-evaluatie van de Bézier-curve en voegen daar een verticale offset aan toe zodat de camera zich net boven het dak van de wagon bevindt. Omdat de camera de positie en indirect de oriëntatie van de wagon volgt, krijg je als kijker echt het gevoel dat je meerijdt over het golvende spoor.
 
 _(Schakel tussen de camera-modi tijdens de demonstratie.)_
 
