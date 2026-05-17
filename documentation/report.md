@@ -77,6 +77,19 @@ Two forms of interaction allow the user to jump the train to the alternate Bézi
 1. **Keyboard (`C` key):** a rising-edge toggle (`cKeyWasPressed` debounce) flips the `usingSecondCurve` flag and resets the arc-length accumulator to 0, placing the train at the start of the new loop.
 2. **Mouse click on the in-world orange button:** `checkButtonInteraction()` projects the 3D button world position `(0, 3, 0)` into screen space using `glm::project()`, computes the 2D pixel distance from the mouse cursor, and triggers the same curve switch if the distance is less than 25 pixels. The button is rendered as a small orange box in the scene.
 
+All interactions:
+
+- Mouse: Look around
+- Scroll: Zoom in and out
+- WASD/ZQSD: Move camera
+- B: Switch between camera mode and free look mode
+- F: Switch to first person camera mode on the carts
+- Left Mouse Click on orange button: Switch between flat and curved track (in camera mode with cursor on screen)
+- C: Switch between flat and curved track
+- Space: Move camera up
+- Shift: Move camera down
+- ESC: Close the application
+
 ---
 
 ## Features Not Implemented (Due to Time Constraints)
@@ -101,6 +114,7 @@ Two forms of interaction allow the user to jump the train to the alternate Bézi
 | 10/05 | Denis | Resolved merge conflicts on main branch | 0.5 h |
 | 10/05 | Maxim | Implemented FBO post-processing pipeline with sharpen convolution kernel in `post_sharpen.frag`; attempted bloom on lights (too complex, dropped) | 4 h |
 | 13/05 | Denis | Added railroad tie visualisation (`drawRailroad()` with Frenet-frame orientation) | 0.5 h |
-| | **Denis total** | | **15 h** |
-| | **Maxim total** | | **13 h** |
-| | **Grand total** | | **28 h** |
+
+**Denis total:** 15 h  
+**Maxim total:** 13 h  
+**Grand total: 28 h**
