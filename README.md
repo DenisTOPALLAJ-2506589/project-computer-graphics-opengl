@@ -27,7 +27,7 @@
 
 ## Video
 
-The video is available on youtube: TODO
+The video is available on YouTube: <https://www.youtube.com/watch?v=5Up_Vm5ZNoE>
 
 ## Authors
 

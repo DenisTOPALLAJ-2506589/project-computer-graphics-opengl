@@ -1,8 +1,14 @@
+---
+header-includes:
+    - \usepackage{longtable}
+---
+
 # Report – Project Computer Graphics and Visual Computing (OpenGL)
 
 Course: Computer Graphics & Visual Computing  
 Academic Year: 2025–2026  
-Group Members: Denis Topallaj & Maxim Peeters
+Group Members: Denis Topallaj & Maxim Peeters  
+Video Demo: <https://www.youtube.com/watch?v=5Up_Vm5ZNoE>
 
 ---
 
@@ -19,7 +25,7 @@ Each curve is built from 13 control points spanning 4 segments. Curve evaluation
 
 ### 2. Animation – Constant Speed via Arc Length (Denis)
 
-To guarantee that the train moves at a *constant speed* regardless of the local curvature of the curve, a **look-up table (LUT)** based on arc length is built for each Bézier curve (`BezierCurve::buildLUT`, 400 samples). Each entry stores a `(t, arcLength)` pair. During the render loop, a global distance accumulator is incremented by `deltaTime  x  5.0` units/second, and `getTFromDistance()` linearly interpolates inside the LUT to recover the corresponding curve parameter `t`. This means the position is always sampled at the arc-length-correct parameter, not at a uniformly-spaced `t`, which would produce uneven speed.
+To guarantee that the train moves at a _constant speed_ regardless of the local curvature of the curve, a **look-up table (LUT)** based on arc length is built for each Bézier curve (`BezierCurve::buildLUT`, 400 samples). Each entry stores a `(t, arcLength)` pair. During the render loop, a global distance accumulator is incremented by `deltaTime  x  5.0` units/second, and `getTFromDistance()` linearly interpolates inside the LUT to recover the corresponding curve parameter `t`. This means the position is always sampled at the arc-length-correct parameter, not at a uniformly-spaced `t`, which would produce uneven speed.
 
 ### 3. Models and Textures (Denis)
 
@@ -36,11 +42,11 @@ The active Bézier curve is visualised in two ways:
 
 Three interactive camera modes are available, toggled via keyboard:
 
-| Key | Mode |
-|-----|------|
-| `B` | Free-fly overview camera (mouse look enabled) |
-| `F` | First-person view (FPV) locked to the middle carriage |
-| Default | Overview camera with right-click mouse look |
+| Key     | Mode                                                  |
+| ------- | ----------------------------------------------------- |
+| `B`     | Free-fly overview camera (mouse look enabled)         |
+| `F`     | First-person view (FPV) locked to the middle carriage |
+| Default | Overview camera with right-click mouse look           |
 
 The `Camera` class (based on the LearnOpenGL free-look camera) supports `ProcessKeyboard`, `ProcessMouseMovement`, and `ProcessMouseScroll`. In FPV mode (`fpvActive`), the camera position is set every frame to the world position of the middle carriage (index `numCarriages/2 = 3`) with a +1 unit vertical offset, and a `GLFW_CURSOR_DISABLED` raw mouse mode is activated. In overview mode (`cameraMode`), WASD/ZQSD move the camera freely through the scene. The camera orientation towards the current position + tangent happens implicitly because the FPV camera position tracks the carriage.
 
@@ -60,12 +66,12 @@ Each light computes its contribution via `CalcPointLight()` and the results are 
 A full-screen **framebuffer object (FBO)** post-processing pipeline is implemented via the `Framebuffer` class. The render loop uses a **two-pass** approach:
 
 1. **First pass:** the entire 3D scene is rendered into `screenFBO` (an off-screen colour + depth buffer).
-2. **Second pass:** depth testing is disabled, a full-screen quad is drawn, and `post_sharpen.frag` samples a 3 x 3 neighbourhood of texels from the scene texture and applies a **sharpen convolution kernel**:
+2. **Second pass:** depth testing is disabled, a full-screen quad is drawn, and `post_sharpen.frag` samples a 3 x 3 neighbourhood of pixels from the scene texture and applies a **sharpen convolution kernel**:
 
 ```markdown
--0.5  -1.0  -0.5
--1.0   7.0  -1.0
--0.5  -1.0  -0.5
+-0.5 -1.0 -0.5
+-1.0 7.0 -1.0
+-0.5 -1.0 -0.5
 ```
 
 The centre weight (7.0) amplifies the original pixel while the negative neighbours subtract surrounding values, effectively enhancing edges and fine detail across the entire rendered frame.
@@ -101,20 +107,36 @@ All interactions:
 
 ## Time Spent
 
-| Date | Who | Work done | Time |
-|------|-----|-----------|------|
-| 12/04 | Denis | OpenGL lesson 1 exercises (up to §1.2 Rendering) | 3 h |
-| 20/04 | Denis | Finished OpenGL exercises; created GitHub repo with initial folder structure | 2 h |
-| 23/04 | Denis | Refactored `Shader.cpp` and `Mesh.cpp`; added `Texture.cpp` (train-carriage.png); added `Camera.cpp` with WASD/ZQSD movement; updated `basic.vert` / `basic.frag` for texture + camera | 3 h |
-| 27/04 | Denis | Added Bézier curves (flat xz-plane + heighted variant); added multiple carriages; added Shift/Space camera movement; refactored `main.cpp`; added track-switch via **C**; switched from parameter-based to arc-length-based animation | 3 h |
-| 29/04 | Maxim | Completed all OpenGL tutorial exercises in preparation for lighting work | 6 h |
-| 07/05 | Denis | Added interaction: **B** toggles free-look / cursor mode; clicking the orange cube switches tracks (mouse picking via `glm::project()`); updated README | 1.5 h |
-| 08/05 | Denis | Added first-person view (**F** key); rendered track as a continuous connected line; added source citations for magic-number functions; updated README | 1.5 h |
-| 08/05 | Maxim | Added 4 point lights around the track; implemented per-pixel Phong shading in `basic.frag` with quadratic attenuation; added visible lamp cubes | 3 h |
-| 10/05 | Denis | Resolved merge conflicts on main branch | 0.5 h |
-| 10/05 | Maxim | Implemented FBO post-processing pipeline with sharpen convolution kernel in `post_sharpen.frag`; attempted bloom on lights (too complex, dropped) | 4 h |
-| 13/05 | Denis | Added railroad tie visualisation (`drawRailroad()` with Frenet-frame orientation) | 0.5 h |
+\begin{center}
+\begin{longtable}{|p{1.8cm}|p{2.2cm}|p{9cm}|p{1.8cm}|}
+\hline
+\textbf{Date} & \textbf{Who} & \textbf{Work done} & \textbf{Time} \\
+\hline
+12/04 & Denis & Completed OpenGL Lesson 1 exercises up to §1.2 Rendering & 3 h \\
+\hline
+20/04 & Denis & Finished OpenGL exercises and created GitHub repository with the initial folder structure & 2 h \\
+\hline
+23/04 & Denis & Refactored Shader.cpp and Mesh.cpp; added Texture.cpp (train-carriage.png); added Camera.cpp with WASD/ZQSD movement; updated basic.vert and basic.frag for texture support and camera integration & 3 h \\
+\hline
+27/04 & Denis & Added Bézier curves (flat xz-plane and elevated variant); added multiple carriages; implemented Shift/Space camera movement; refactored main.cpp; added track switching with the C key; changed animation from parameter-based to arc-length-based movement & 3 h \\
+\hline
+29/04 & Maxim & Completed all OpenGL tutorial exercises in preparation for lighting implementation & 6 h \\
+\hline
+07/05 & Denis & Added interaction features: B toggles free-look/cursor mode; clicking the orange cube switches tracks using mouse picking with glm::project(); updated the README & 1.5 h \\
+\hline
+08/05 & Denis & Added first-person view with the F key; rendered the track as a continuous connected line; added source citations for magic-number functions; updated the README & 1.5 h \\
+\hline
+08/05 & Maxim & Added four point lights around the track; implemented per-pixel Phong shading in basic.frag with quadratic attenuation; added visible lamp cubes & 3 h \\
+\hline
+10/05 & Denis & Resolved merge conflicts on the main branch & 0.5 h \\
+\hline
+10/05 & Maxim & Implemented an FBO post-processing pipeline with a sharpen convolution kernel in post-sharpen.frag; experimented with bloom lighting but dropped it due to complexity & 4 h \\
+\hline
+13/05 & Denis & Added railroad tie visualization with drawRailroad() using Frenet-frame orientation & 0.5 h \\
+\hline
+\end{longtable}
+\end{center}
 
 **Denis total:** 15 h  
 **Maxim total:** 13 h  
-**Grand total: 28 h**
+**Grand total:** 28 h
